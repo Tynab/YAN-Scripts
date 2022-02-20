@@ -8,23 +8,23 @@ namespace YAN_Scripts
     public class YANConstant
     {
         #region Variable
-        public static Font _f_tit_VIE_ = new Font("Tahoma", 10);
-        public static Font _f_tit_JAP_ = new Font("Yu Gothic", 11);
-        public static Font _f_txt_VIE_ = new Font("Segoe UI Light", 10);
-        public static Font _f_txt_JAP_ = new Font("Meiryo", 10);
-        public static Font _f_cap_VIE_ = new Font("Verdana", 9);
-        public static readonly Color _xlTitColor_ = FromArgb(0, 122, 204);
+        public static Font _fnt_tit_VIE_ = new Font("Tahoma", 10);
+        public static Font _fnt_tit_JAP_ = new Font("Yu Gothic", 11);
+        public static Font _fnt_text_VIE_ = new Font("Segoe UI Light", 10);
+        public static Font _fnt_text_JAP_ = new Font("Meiryo", 10);
+        public static Font _fnt_cap_VIE_ = new Font("Verdana", 9);
+        public static readonly Color _cl_tit_xl_ = FromArgb(0, 122, 204);
         public const string _s_T_ = "Có";
         public const string _s_F_ = "Không";
-        public const string _p_xl_ = "Microsoft Excel";
+        public const string _namePrcXl_ = "Microsoft Excel";
         public const string _nameCO_ = "Nephilim";
         public const string _numFormat_ = "N0";
         public const string _dateFormat_ = "dd/MM/yyyy";
         public const string _dateFormatName_ = "dd-MM-yyyy";
         public const string _dateFormatPara_ = "dd.MM.yyyy";
         public const string _timezoneVN_ = "07:00:00";
-        public const string _formatText_xl_ = "@";
-        public const string _formatText_code = "Unicode Text";
+        public const string _formatTextXl_ = "@";
+        public const string _formatTextCode = "Unicode Text";
         public const string _fontDoc_ = "Times New Roman";
         public const float _animatorSpeed_ = 0.02f;
         public const int _timeout_ = 7000;

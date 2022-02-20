@@ -7,33 +7,33 @@ namespace YAN_Scripts
     public class YANCounter
     {
         #region Fields
-        public Label _label_Percent_;
-        private FormCounter _form_Counter;
+        public Label _lbl_Percent_;
+        private FormCounter _frm_Counter;
         private Thread _thread;
-        private int _radius;
+        private int _rad;
         private bool _isTop;
         #endregion
 
         #region Methods
         //loading process
-        private void LoadingProcess(object parent)
+        private void LoadingPrc(object parent)
         {
-            _form_Counter = new FormCounter((Form)parent, _radius, _isTop);
-            _label_Percent_ = _form_Counter.labelPercent;
-            _form_Counter.ShowDialog();
+            _frm_Counter = new FormCounter((Form)parent, _rad, _isTop);
+            _lbl_Percent_ = _frm_Counter.labelPercent;
+            _frm_Counter.ShowDialog();
         }
 
         /// <summary>
         /// Turn on counter form.
         /// </summary>
-        /// <param name="form">Parent form.</param>
-        /// <param name="corner">Radius border.</param>
+        /// <param name="frm">Parent form.</param>
+        /// <param name="cor">Radius border.</param>
         /// <param name="onTop">Enable top most.</param>
-        public void OnLoader(Form form, int corner, bool onTop)
+        public void OnLoader(Form frm, int cor, bool onTop)
         {
-            _thread = new Thread(new ParameterizedThreadStart(LoadingProcess));
-            _thread.Start(form);
-            _radius = corner;
+            _thread = new Thread(new ParameterizedThreadStart(LoadingPrc));
+            _thread.Start(frm);
+            _rad = cor;
             _isTop = onTop;
         }
 
@@ -42,10 +42,10 @@ namespace YAN_Scripts
         /// </summary>
         public void OffLoader()
         {
-            if (_form_Counter != null)
+            if (_frm_Counter != null)
             {
-                _form_Counter.BeginInvoke(new ThreadStart(_form_Counter.CloseToken));
-                _form_Counter = null;
+                _frm_Counter.BeginInvoke(new ThreadStart(_frm_Counter.FrmCloseToken));
+                _frm_Counter = null;
                 _thread = null;
             }
         }

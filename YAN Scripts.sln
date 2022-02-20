@@ -5,6 +5,10 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YAN Scripts", "YAN Scripts\YAN Scripts.csproj", "{62763ACF-F3FE-42A6-B1CC-A13D51B41E12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YAN Controls", "..\YAN Controls\YAN Controls\YAN Controls.csproj", "{DC1D417A-7313-4CAF-AE8E-455953131D17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YAN Message Box", "..\YAN Message Box\YAN Message Box\YAN Message Box.csproj", "{5BEBE07A-D6DF-48FD-87BC-A3EFAD35DAC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{62763ACF-F3FE-42A6-B1CC-A13D51B41E12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62763ACF-F3FE-42A6-B1CC-A13D51B41E12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62763ACF-F3FE-42A6-B1CC-A13D51B41E12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC1D417A-7313-4CAF-AE8E-455953131D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC1D417A-7313-4CAF-AE8E-455953131D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC1D417A-7313-4CAF-AE8E-455953131D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC1D417A-7313-4CAF-AE8E-455953131D17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BEBE07A-D6DF-48FD-87BC-A3EFAD35DAC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BEBE07A-D6DF-48FD-87BC-A3EFAD35DAC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BEBE07A-D6DF-48FD-87BC-A3EFAD35DAC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BEBE07A-D6DF-48FD-87BC-A3EFAD35DAC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

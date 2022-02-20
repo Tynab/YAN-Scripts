@@ -7,31 +7,31 @@ namespace YAN_Scripts
     public class YANWaiter
     {
         #region Fields
-        private FormWaiter _form_Waiter;
+        private FormWaiter _frm_Waiter;
         private Thread _thread;
-        private int _radius;
+        private int _rad;
         private bool _isTop;
         #endregion
 
         #region Methods
         //loading process
-        private void LoadingProcess(object parent)
+        private void LoadingPrc(object parent)
         {
-            _form_Waiter = new FormWaiter((Form)parent, _radius, _isTop);
-            _form_Waiter.ShowDialog();
+            _frm_Waiter = new FormWaiter((Form)parent, _rad, _isTop);
+            _frm_Waiter.ShowDialog();
         }
 
         /// <summary>
         /// Turn on waiter form.
         /// </summary>
-        /// <param name="form">Parent form.</param>
-        /// <param name="corner">Radius border.</param>
+        /// <param name="frm">Parent form.</param>
+        /// <param name="cor">Radius border.</param>
         /// <param name="onTop">Enable top most.</param>
-        public void OnLoader(Form form, int corner, bool onTop)
+        public void OnLoader(Form frm, int cor, bool onTop)
         {
-            _thread = new Thread(new ParameterizedThreadStart(LoadingProcess));
-            _thread.Start(form);
-            _radius = corner;
+            _thread = new Thread(new ParameterizedThreadStart(LoadingPrc));
+            _thread.Start(frm);
+            _rad = cor;
             _isTop = onTop;
         }
 
@@ -40,10 +40,10 @@ namespace YAN_Scripts
         /// </summary>
         public void OffLoader()
         {
-            if (_form_Waiter != null)
+            if (_frm_Waiter != null)
             {
-                _form_Waiter.BeginInvoke(new ThreadStart(_form_Waiter.CloseToken));
-                _form_Waiter = null;
+                _frm_Waiter.BeginInvoke(new ThreadStart(_frm_Waiter.FrmCloseToken));
+                _frm_Waiter = null;
                 _thread = null;
             }
         }

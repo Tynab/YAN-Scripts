@@ -90,6 +90,7 @@
     <Compile Include="YANWaiter.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
@@ -135,6 +136,16 @@
     <None Include="Resources\sChange.wav" />
     <None Include="Resources\sBack.wav" />
     <None Include="Resources\ic.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\YAN Controls\YAN Controls\YAN Controls.csproj">
+      <Project>{dc1d417a-7313-4caf-ae8e-455953131d17}</Project>
+      <Name>YAN Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\YAN Message Box\YAN Message Box\YAN Message Box.csproj">
+      <Project>{5bebe07a-d6df-48fd-87bc-a3efad35dac4}</Project>
+      <Name>YAN Message Box</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

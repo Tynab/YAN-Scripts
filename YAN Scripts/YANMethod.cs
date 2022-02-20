@@ -51,6 +51,7 @@ using static YAN_Message_Box.ELang;
 using static YAN_Message_Box.YANMessageBox;
 using static YAN_Scripts.YANConstant;
 using static YAN_Scripts.YANConstant.AlarmAction;
+using Timer = System.Windows.Forms.Timer;
 
 namespace YAN_Scripts
 {
@@ -60,20 +61,20 @@ namespace YAN_Scripts
         //reset win question
         private static void ResetWinQuest()
         {
-            if (MessQuestAdvancedVN("HỎI", "Lỗi ứng dụng chạy ngầm, khởi động lại hệ thống để khắc phục?") == Yes)
+            if (MsgboxQuestAdvancedVN("HỎI", "Lỗi ứng dụng chạy ngầm, khởi động lại hệ thống để khắc phục?") == Yes)
             {
-                TimerWin(Restart, 3);
+                AlarmWin(Restart, 3);
             }
         }
 
         //crop image
-        private static Image CropImg(Image image, Rectangle rectangle) => ((Bitmap)image).Clone(rectangle, image.PixelFormat);
+        private static Image CropImg(Image img, Rectangle rect) => ((Bitmap)img).Clone(rect, img.PixelFormat);
 
         //time trans
         private static uint SwapEndianness(ulong x) => (uint)(((x & 0x000000ff) << 24) + ((x & 0x0000ff00) << 8) + ((x & 0x00ff0000) >> 8) + ((x & 0xff000000) >> 24));
 
         //check date time online socket
-        private static DateTime GetDateTimeOnlSocket()
+        private static DateTime GetDtmOnlSocket()
         {
             var ntpData = new byte[48];
             ntpData[0] = 0x1B;
@@ -89,17 +90,17 @@ namespace YAN_Scripts
         }
 
         //check date time online stream
-        private static DateTime GetDateTimeOnlStream()
+        private static DateTime GetDtmOnlStream()
         {
-            var d_now = Now;
+            var dtmNow = Now;
             using (var streamReader = new StreamReader(new TcpClient("time.nist.gov", 13).GetStream()))
             {
                 if (streamReader != null)
                 {
-                    d_now = ParseExact(streamReader.ReadToEnd().Substring(7, 17), "yy-MM-dd HH:mm:ss", InvariantCulture, AssumeUniversal);
+                    dtmNow = ParseExact(streamReader.ReadToEnd().Substring(7, 17), "yy-MM-dd HH:mm:ss", InvariantCulture, AssumeUniversal);
                 }
             }
-            return d_now;
+            return dtmNow;
         }
 
         //check app installer in app list
@@ -128,54 +129,54 @@ namespace YAN_Scripts
         /// <summary>
         /// Mod form round ellipse.
         /// </summary>
-        /// <param name="nLeftRect">Left path.</param>
-        /// <param name="nTopRect">Top path.</param>
-        /// <param name="nRightRect">Right path.</param>
-        /// <param name="nBottomRect">Bot path.</param>
-        /// <param name="nWidthEllipse">Width path.</param>
-        /// <param name="nHeightElippse">Height path.</param>
+        /// <param name="nLRect">Left path.</param>
+        /// <param name="nTRect">Top path.</param>
+        /// <param name="nRRect">Right path.</param>
+        /// <param name="nBRect">Bot path.</param>
+        /// <param name="nWEllipse">Width path.</param>
+        /// <param name="nHElippse">Height path.</param>
         /// <returns>Platform specific.</returns>
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
-        public static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightElippse);
+        public static extern IntPtr CreateRoundRectRgn(int nLRect, int nTRect, int nRRect, int nBRect, int nWEllipse, int nHElippse);
         #endregion
 
         #region Date Time
         /// <summary>
         /// Get week of year.
         /// </summary>
-        /// <param name="date">Date count.</param>
+        /// <param name="dtm">Date count.</param>
         /// <returns>Num of week.</returns>
-        public static int GetWeekOfYearUpgrade(DateTime date) => CurrentInfo.Calendar.GetWeekOfYear(date, CurrentInfo.CalendarWeekRule, CurrentInfo.FirstDayOfWeek);
+        public static int GetWoyUpgrade(DateTime dtm) => CurrentInfo.Calendar.GetWeekOfYear(dtm, CurrentInfo.CalendarWeekRule, CurrentInfo.FirstDayOfWeek);
 
         /// <summary>
         /// Covert string to date time.
         /// </summary>
-        /// <param name="d_Text">Date time string format.</param>
-        /// <param name="d_Format">Format of string date time.</param>
+        /// <param name="dtmText">Date time string format.</param>
+        /// <param name="dtmFormat">Format of string date time.</param>
         /// <returns>Date time.</returns>
-        public static bool TryParseExactUpgrade(string d_Text, string d_Format, out DateTime dateTime) => TryParseExact(d_Text, d_Format, InvariantCulture, DateTimeStyles.None, out dateTime);
+        public static bool TryParseExactUpgrade(string dtmText, string dtmFormat, out DateTime dtm) => TryParseExact(dtmText, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
 
         /// <summary>
         /// Convert hour and minute text to date time format.
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
-        /// <param name="dateTime">Time format.</param>
+        /// <param name="dtm">Time format.</param>
         /// <returns>Done or failed.</returns>
-        public static bool TryParseTimeFromHM(string hm, out DateTime dateTime) => TryParseExactUpgrade(hm, "HH:mm", out dateTime) || TryParseExactUpgrade(hm, "h:mm", out dateTime) || TryParseExactUpgrade(hm, "HH:m", out dateTime) || TryParseExactUpgrade(hm, "h:m", out dateTime);
+        public static bool TryParseTimeFromHm(string hm, out DateTime dtm) => TryParseExactUpgrade(hm, "HH:mm", out dtm) || TryParseExactUpgrade(hm, "h:mm", out dtm) || TryParseExactUpgrade(hm, "HH:m", out dtm) || TryParseExactUpgrade(hm, "h:m", out dtm);
 
         /// <summary>
         /// Convert hour and minute text to time hour.
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
-        public static double TimeHFromHM(string hm) => TryParseTimeFromHM(hm, out var tempTime) ? (tempTime - Today).TotalHours : 0;
+        public static double TimeHourFromHm(string hm) => TryParseTimeFromHm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
         /// Covert number to hour and minute text.
         /// </summary>
         /// <param name="min">Minutes.</param>
         /// <returns>Hour and minute text.</returns>
-        public static string HMFromDouble(double min)
+        public static string HmFromDub(double min)
         {
             var timeSpan = FromHours(min);
             return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
@@ -185,28 +186,28 @@ namespace YAN_Scripts
         /// Get date time online.
         /// </summary>
         /// <returns>International date time.</returns>
-        public static DateTime DateTimeOnlAdvanced()
+        public static DateTime DtmOnlAdvanced()
         {
-            var d_now = Now;
+            var dtmNow = Now;
             if (CheckInternetConnect())
             {
                 try
                 {
-                    d_now = GetDateTimeOnlSocket();
+                    dtmNow = GetDtmOnlSocket();
                 }
                 catch
                 {
                     try
                     {
-                        d_now = GetDateTimeOnlStream();
+                        dtmNow = GetDtmOnlStream();
                     }
                     catch (Exception ex)
                     {
-                        MessErrorAdvanced("ERROR", ex.ToString());
+                        MsgboxErrorAdvanced("ERROR", ex.ToString());
                     }
                 }
             }
-            return d_now;
+            return dtmNow;
         }
         #endregion
 
@@ -214,16 +215,16 @@ namespace YAN_Scripts
         /// <summary>
         /// Round up span 0.5.
         /// </summary>
-        /// <param name="x">Number.</param>
+        /// <param name="val">Number.</param>
         /// <returns>Rounded number.</returns>
-        public static double RoundUpPoint5(double x) => Ceiling(x * 2) / 2;
+        public static double RoundUpPoint5(double val) => Ceiling(val * 2) / 2;
 
         /// <summary>
         /// Round down span 0.5.
         /// </summary>
-        /// <param name="x">Number</param>
+        /// <param name="val">Number.</param>
         /// <returns>Rounded number.</returns>
-        public static double RoundDownPoint5(double x) => Floor(x * 2) / 2;
+        public static double RoundDownPoint5(double val) => Floor(val * 2) / 2;
 
         /// <summary>
         /// Find min value.
@@ -297,22 +298,22 @@ namespace YAN_Scripts
         /// <typeparam name="T">Data type.</typeparam>
         /// <param name="obj">Object value.</param>
         /// <returns>Converted value.</returns>
-        public static T ConvertValFromDB<T>(object obj) => obj == null || obj == Value ? default : (T)obj;
+        public static T ConvertValFromDb<T>(object obj) => obj == null || obj == Value ? default : (T)obj;
 
         /// <summary>
         /// Datatable search row index.
         /// </summary>
         /// <param name="dt">Datatable source.</param>
         /// <param name="dcHeader">Column header.</param>
-        /// <param name="searching">Value to search.</param>
+        /// <param name="searchText">Value to search.</param>
         /// <returns>Index of row datatable.</returns>
-        public static int DTSearchRow(DataTable dt, string dcHeader, string searching) => dt.Rows.IndexOf(dt.Select($"{dcHeader} = '{searching}'")[0]);
+        public static int DtSearchRow(DataTable dt, string dcHeader, string searchText) => dt.Rows.IndexOf(dt.Select($"{dcHeader} = '{searchText}'")[0]);
 
         /// <summary>
         /// Datatable add new row with default value.
         /// </summary>
         /// <param name="dt">Datatable source.</param>
-        public static void DTAddRow(DataTable dt) => dt.Rows.Add(dt.NewRow());
+        public static void DtAddRow(DataTable dt) => dt.Rows.Add(dt.NewRow());
 
         /// <summary>
         /// Datatable add column at index.
@@ -321,51 +322,51 @@ namespace YAN_Scripts
         /// <param name="dt">Datatable source.</param>
         /// <param name="dcName">Name of new column.</param>
         /// <param name="index">Index of new column.</param>
-        public static void DTAddColAt<T>(DataTable dt, string dcName, int index) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(index);
+        public static void DtAddColAt<T>(DataTable dt, string dcName, int index) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(index);
 
         /// <summary>
         /// Datatable crop column.
         /// </summary>
-        /// <param name="dtSource">Datatable form.</param>
-        /// <param name="dtCurrent">Datatable crop.</param>
-        public static void DTSyncCol(DataTable dtSource, DataTable dtCurrent)
+        /// <param name="dtSrc">Datatable form.</param>
+        /// <param name="dt">Datatable current.</param>
+        public static void DtSyncCol(DataTable dtSrc, DataTable dt)
         {
-            while (dtCurrent.Columns.Count > dtSource.Columns.Count)
+            while (dt.Columns.Count > dtSrc.Columns.Count)
             {
-                dtCurrent.Columns.RemoveAt(dtCurrent.Columns.Count - 1);
+                dt.Columns.RemoveAt(dt.Columns.Count - 1);
             }
-            while (dtCurrent.Columns.Count < dtSource.Columns.Count)
+            while (dt.Columns.Count < dtSrc.Columns.Count)
             {
-                DTAddColAt<string>(dtCurrent, dtSource.Columns[dtCurrent.Columns.Count].ColumnName, dtCurrent.Columns.Count);
+                DtAddColAt<string>(dt, dtSrc.Columns[dt.Columns.Count].ColumnName, dt.Columns.Count);
             }
         }
 
         /// <summary>
         /// Datatable transfer data.
         /// </summary>
-        /// <param name="dtSource">Datatable form.</param>
-        /// <param name="dtCurrent">Datatable to.</param>
-        public static void DTTransData(DataTable dtSource, DataTable dtCurrent) => dtSource.AsEnumerable().Take(dtSource.Rows.Count).CopyToDataTable(dtCurrent, OverwriteChanges);
+        /// <param name="dtSrc">Datatable from.</param>
+        /// <param name="dt">Datatable to.</param>
+        public static void DtTransData(DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dt, OverwriteChanges);
 
         /// <summary>
         /// Datatable transfer data and reverse row.
         /// </summary>
-        /// <param name="dtSource">Datatable form.</param>
-        /// <param name="dtCurrent">Datatable to.</param>
-        public static void DTTransReverseData(DataTable dtSource, DataTable dtCurrent) => dtSource.AsEnumerable().Take(dtSource.Rows.Count).Reverse().CopyToDataTable(dtCurrent, OverwriteChanges);
+        /// <param name="dtSrc">Datatable from.</param>
+        /// <param name="dt">Datatable to.</param>
+        public static void DtTransReverseData(DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dt, OverwriteChanges);
 
         /// <summary>
         /// Datatable merge all.
         /// </summary>
-        /// <param name="dataTables">All datatables in array.</param>
-        /// <param name="dtSource">Datatable to.</param>
-        public static void DTAll41(DataTable[] dataTables, DataTable dtSource, int length)
+        /// <param name="dts">All datatables in array.</param>
+        /// <param name="dt">Datatable to.</param>
+        public static void DtAll41(DataTable[] dts, DataTable dt, int length)
         {
             for (var i = 0; i < length; i++)
             {
-                if (dataTables[i] != null)
+                if (dts[i] != null)
                 {
-                    DTTransData(dataTables[i], dtSource);
+                    DtTransData(dts[i], dt);
                 }
             }
         }
@@ -375,7 +376,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="dgv">DataGridView.</param>
         /// <param name="state">State of setting.</param>
-        public static void DoubleBuffered(DataGridView dgv, bool state)
+        public static void DgvDubBuffered(DataGridView dgv, bool state)
         {
             if (!TerminalServerSession)
             {
@@ -387,24 +388,25 @@ namespace YAN_Scripts
         /// Copy datatable to clipboard.
         /// </summary>
         /// <param name="dt">Datatable source.</param>
-        public static void DT2Clipboard(DataTable dt)
+        public static void Dt2Clipboard(DataTable dt)
         {
-            var form = new Form
+            using (var frm = new Form
             {
                 Opacity = 0,
                 ShowInTaskbar = false
-            };
-            var dgv = new DataGridView
+            })
             {
-                ClipboardCopyMode = EnableWithoutHeaderText,
-                DataSource = dt
-            };
-            form.Controls.Add(dgv);
-            form.Show();
-            dgv.SelectAll();
-            var dobj = dgv.GetClipboardContent().GetText();
-            SetText(dobj);
-            form.Dispose();
+                var dgv = new DataGridView
+                {
+                    ClipboardCopyMode = EnableWithoutHeaderText,
+                    DataSource = dt
+                };
+                frm.Controls.Add(dgv);
+                frm.Show();
+                dgv.SelectAll();
+                var ods = dgv.GetClipboardContent().GetText();
+                SetText(ods);
+            }
         }
 
         /// <summary>
@@ -412,18 +414,18 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="dgv">DataGridView.</param>
         /// <param name="state">State of setting.</param>
-        public static void DGVAutoSizeMod(DataGridView dgv, bool state) => dgv.AutoSizeColumnsMode = state ? AllCells : DataGridViewAutoSizeColumnsMode.None;
+        public static void DgvAutoSizeMod(DataGridView dgv, bool state) => dgv.AutoSizeColumnsMode = state ? AllCells : DataGridViewAutoSizeColumnsMode.None;
         #endregion
 
         #region Window
         /// <summary>
         /// Timer window action.
         /// </summary>
-        /// <param name="action">Action on window.</param>
+        /// <param name="act">Action on window.</param>
         /// /// <param name="sec">Second of countdown.</param>
-        public static void TimerWin(AlarmAction action, int sec)
+        public static void AlarmWin(AlarmAction act, int sec)
         {
-            var cmt = action == ShutDown ? "s" : "r";
+            var cmt = act == ShutDown ? "s" : "r";
             Start("shutdown.exe", $"-{cmt} -t {sec}");
         }
 
@@ -441,17 +443,17 @@ namespace YAN_Scripts
         /// <summary>
         /// Change color by value.
         /// </summary>
-        /// <param name="color">Current color.</param>
+        /// <param name="cl">Current color.</param>
         /// <param name="val">Value.</param>
         /// <returns>New color.</returns>
-        public static Color ColorUpDown(Color color, int val) => FromArgb((color.R + val) % 256, (color.G + val) % 256, (color.B + val) % 256);
+        public static Color ClUpDown(Color cl, int val) => FromArgb((cl.R + val) % 256, (cl.G + val) % 256, (cl.B + val) % 256);
 
         /// <summary>
         /// Invert color.
         /// </summary>
-        /// <param name="color">The color.</param>
+        /// <param name="cl">The color.</param>
         /// <returns>New color.</returns>
-        public static Color ColorInvert(Color color) => FromArgb(color.ToArgb() ^ 0xffffff);
+        public static Color ClInvert(Color cl) => FromArgb(cl.ToArgb() ^ 0xffffff);
 
         /// <summary>
         /// Capitalize each word.
@@ -473,27 +475,27 @@ namespace YAN_Scripts
         /// Kill process.
         /// </summary>
         /// <param name="name">Name of the application.</param>
-        public static void KillProcess(string name)
+        public static void KillPrc(string name)
         {
             if (GetProcessesByName(name).Count() > 0)
             {
-                ForEach(GetProcessesByName(name), process => process.Kill());
+                ForEach(GetProcessesByName(name), prc => prc.Kill());
             }
         }
 
         /// <summary>
         /// Set label text another thread.
         /// </summary>
-        /// <param name="label">Label other thread.</param>
+        /// <param name="lbl">Label other thread.</param>
         /// <param name="text">Text set.</param>
-        public static void InvokeLabelText(Label label, string text) => label.Invoke((MethodInvoker)(() => label.Text = text));
+        public static void InvokeLblText(Label lbl, string text) => lbl.Invoke((MethodInvoker)(() => lbl.Text = text));
 
         /// <summary>
         /// Set panel width another thread.
         /// </summary>
-        /// <param name="panel">Panel other thread.</param>
-        /// <param name="w">Width of panel.</param>
-        public static void InvokeWPanel(Panel panel, int w) => panel.Invoke((MethodInvoker)(() => panel.Width = w));
+        /// <param name="pnl">Panel other thread.</param>
+        /// <param name="wPnl">Width of panel.</param>
+        public static void InvokeWPnl(Panel pnl, int wPnl) => pnl.Invoke((MethodInvoker)(() => pnl.Width = wPnl));
         #endregion
 
         #region File
@@ -610,16 +612,16 @@ namespace YAN_Scripts
         /// <summary>
         /// Copy folder.
         /// </summary>
-        /// <param name="sourceDirName">Folder source.</param>
+        /// <param name="srcDirName">Folder source.</param>
         /// <param name="destDirName">New address copy to.</param>
         /// <param name="copySubDirs">With sub folder or not.</param>
-        public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        public static void DirectoryCopy(string srcDirName, string destDirName, bool copySubDirs)
         {
             CreateFolderAdvanced(destDirName);
-            ForEach(new DirectoryInfo(sourceDirName).GetFiles(), file => file.CopyTo(Combine(destDirName, file.Name), false));
+            ForEach(new DirectoryInfo(srcDirName).GetFiles(), file => file.CopyTo(Combine(destDirName, file.Name), false));
             if (copySubDirs)
             {
-                ForEach(new DirectoryInfo(sourceDirName).GetDirectories(), subdir => DirectoryCopy(subdir.FullName, Combine(destDirName, subdir.Name), copySubDirs));
+                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCopy(subdir.FullName, Combine(destDirName, subdir.Name), copySubDirs));
             }
         }
         #endregion
@@ -652,13 +654,13 @@ namespace YAN_Scripts
         /// <summary>
         /// Fade in the form when show.
         /// </summary>
-        /// <param name="form">The form showing.</param>
-        public static void FadeInForm(Form form)
+        /// <param name="frm">The form showing.</param>
+        public static void FadeInFrm(Form frm)
         {
-            while (form.Opacity < 1)
+            while (frm.Opacity < 1)
             {
-                form.Opacity += 0.05;
-                form.Update();
+                frm.Opacity += 0.05;
+                frm.Update();
                 Thread.Sleep(10);
             }
         }
@@ -666,13 +668,13 @@ namespace YAN_Scripts
         /// <summary>
         /// Fade out the form when hide.
         /// </summary>
-        /// <param name="form">The form hiding.</param>
-        public static void FadeOutForm(Form form)
+        /// <param name="frm">The form hiding.</param>
+        public static void FadeOutFrm(Form frm)
         {
-            while (form.Opacity > 0)
+            while (frm.Opacity > 0)
             {
-                form.Opacity -= 0.05;
-                form.Update();
+                frm.Opacity -= 0.05;
+                frm.Update();
                 Thread.Sleep(10);
             }
         }
@@ -682,38 +684,38 @@ namespace YAN_Scripts
         /// <summary>
         /// Get all objects of type in control.
         /// </summary>
-        /// <param name="control">The control finding objects.</param>
+        /// <param name="ctrl">The control finding objects.</param>
         /// <param name="type">Type of object finding.</param>
         /// <returns>Control list.</returns>
-        public static IEnumerable<Control> GetAllObject(Control control, Type type)
+        public static IEnumerable<Control> GetAllObj(Control ctrl, Type type)
         {
-            var controls = control.Controls.Cast<Control>();
-            return controls.SelectMany(ctrl => GetAllObject(ctrl, type)).Concat(controls).Where(c => c.GetType() == type);
+            var ctrls = ctrl.Controls.Cast<Control>();
+            return ctrls.SelectMany(obj => GetAllObj(obj, type)).Concat(ctrls).Where(c => c.GetType() == type);
         }
 
         /// <summary>
         /// Find main panel.
         /// </summary>
-        /// <param name="control">The control focus.</param>
-        /// <param name="namePanel">Name of the panel.</param>
+        /// <param name="ctrl">The control focus.</param>
+        /// <param name="namePnl">Name of the panel.</param>
         /// <returns>Main panel.</returns>
-        public static Panel FindMainPanel(Control control, string namePanel)
+        public static Panel FindMainPnl(Control ctrl, string namePnl)
         {
-            var panel = (Panel)control.Parent;
-            return panel.Name != namePanel ? FindMainPanel(panel, namePanel) : panel;
+            var pnl = (Panel)ctrl.Parent;
+            return pnl.Name != namePnl ? FindMainPnl(pnl, namePnl) : pnl;
         }
 
         /// <summary>
         /// Fill item list of combo box by all file in folder.
         /// </summary>
-        /// <param name="comboBox">The combo box fill item list.</param>
+        /// <param name="cmb">The combo box fill item list.</param>
         /// <param name="path">Path of folder.</param>
-        public static void ComboBoxFillByFolder(YANComboBox comboBox, string path)
+        public static void CombFillByFolder(YANComboBox cmb, string path)
         {
-            comboBox.Items.Clear();
+            cmb.Items.Clear();
             foreach (var file in GetFiles(path)) //need sort
             {
-                comboBox.Items.Add(GetFileNameWithoutExtension(file));
+                cmb.Items.Add(GetFileNameWithoutExtension(file));
             }
         }
         #endregion
@@ -722,59 +724,59 @@ namespace YAN_Scripts
         /// <summary>
         /// Uniform horizontal scale image to picture box.
         /// </summary>
-        /// <param name="pictureBox">The picture box used display image.</param>
-        public static void PictureBoxZoomWidth(PictureBox pictureBox)
+        /// <param name="pic">The picture box used display image.</param>
+        public static void PicWZoom(PictureBox pic)
         {
-            pictureBox.SizeMode = Zoom;
-            pictureBox.Image = CropImg(pictureBox.Image, new Rectangle(0, 0, pictureBox.Image.Width, pictureBox.Image.Width));
+            pic.SizeMode = Zoom;
+            pic.Image = CropImg(pic.Image, new Rectangle(0, 0, pic.Image.Width, pic.Image.Width));
         }
 
         /// <summary>
         /// Uniform vertical scale image to picture box.
         /// </summary>
-        /// <param name="pictureBox">The picture box used display image.</param>
-        public static void PictureBoxZoomHeight(PictureBox pictureBox)
+        /// <param name="pic">The picture box used display image.</param>
+        public static void PicHZoom(PictureBox pic)
         {
-            pictureBox.SizeMode = Zoom;
-            pictureBox.Image = CropImg(pictureBox.Image, new Rectangle(0, 0, pictureBox.Image.Height, pictureBox.Image.Height));
+            pic.SizeMode = Zoom;
+            pic.Image = CropImg(pic.Image, new Rectangle(0, 0, pic.Image.Height, pic.Image.Height));
         }
 
         /// <summary>
         /// Check and start timer.
         /// </summary>
-        /// <param name="timer">Timer checking.</param>
-        public static void TimerStartAdvanced(System.Windows.Forms.Timer timer)
+        /// <param name="tmr">Timer checking.</param>
+        public static void TmrStartAdvanced(Timer tmr)
         {
-            if (!timer.Enabled)
+            if (!tmr.Enabled)
             {
-                timer.Start();
+                tmr.Start();
             }
         }
 
         /// <summary>
         /// Check and end timer.
         /// </summary>
-        /// <param name="timer">Timer checking.</param>
-        public static void TimerEndAdvanced(System.Windows.Forms.Timer timer)
+        /// <param name="tmr">Timer checking.</param>
+        public static void TmrEndAdvanced(Timer tmr)
         {
-            if (timer.Enabled)
+            if (tmr.Enabled)
             {
-                timer.Stop();
+                tmr.Stop();
             }
         }
 
         /// <summary>
         /// Highlight state of title text when focus content control.
         /// </summary>
-        /// <param name="control">Content control.</param>
-        /// <param name="nameControl">Common name of the control.</param>
-        /// <param name="color">Color of title text.</param>
+        /// <param name="ctrl">Content control.</param>
+        /// <param name="nameCtrl">Common name of the control.</param>
+        /// <param name="cl">Color of title text.</param>
         /// <param name="isBold">Format bold or regular.</param>
-        public static void SetHighLightLabel(Control control, string nameControl, Color color, bool isBold)
+        public static void SetHighLightLbl(Control ctrl, string nameCtrl, Color cl, bool isBold)
         {
-            var label = (Label)control.FindForm().Controls.Find($"label{control.Name.Substring(nameControl.Length)}", true).FirstOrDefault();
-            label.ForeColor = color;
-            label.Font = isBold ? new Font(label.Font, Bold) : new Font(label.Font, Regular);
+            var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(nameCtrl.Length)}", true).FirstOrDefault();
+            lbl.ForeColor = cl;
+            lbl.Font = isBold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
         }
         #endregion
 
@@ -785,7 +787,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessNoneAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
+        public static DialogResult MsgboxNoneAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
 
         /// <summary>
         /// Show the message box infomation freedom text.
@@ -793,7 +795,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessInfoAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        public static DialogResult MsgboxInfoAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         /// <summary>
         /// Show the message box question freedom text.
@@ -801,7 +803,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessQuestAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        public static DialogResult MsgboxQuestAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
         /// <summary>
         /// Show the message box warning freedom text.
@@ -809,7 +811,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessWarningAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+        public static DialogResult MsgboxWarningAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         /// <summary>
         /// Show the message box error freedom text.
@@ -817,7 +819,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessErrorAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        public static DialogResult MsgboxErrorAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         /// <summary>
         /// Show the message box none freedom text Japanese.
@@ -825,7 +827,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessNoneAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
+        public static DialogResult MsgboxNoneAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
 
         /// <summary>
         /// Show the message box infomation freedom text Japanese.
@@ -833,7 +835,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessInfoAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
+        public static DialogResult MsgboxInfoAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
 
         /// <summary>
         /// Show the message box question freedom text Japanese.
@@ -841,7 +843,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessQuestAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
+        public static DialogResult MsgboxQuestAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
 
         /// <summary>
         /// Show the message box warning freedom text Japanese.
@@ -849,7 +851,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessWarningAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
+        public static DialogResult MsgboxWarningAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
 
         /// <summary>
         /// Show the message box error freedom text Japanese.
@@ -857,7 +859,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessErrorAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
+        public static DialogResult MsgboxErrorAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
 
         /// <summary>
         /// Show the message box none freedom text Vietnamese.
@@ -865,7 +867,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessNoneAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
+        public static DialogResult MsgboxNoneAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
 
         /// <summary>
         /// Show the message box infomation freedom text Vietnamese.
@@ -873,7 +875,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessInfoAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
+        public static DialogResult MsgboxInfoAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
 
         /// <summary>
         /// Show the message box question freedom text Vietnamese.
@@ -881,7 +883,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessQuestAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
+        public static DialogResult MsgboxQuestAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
 
         /// <summary>
         /// Show the message box warning freedom text Vietnamese.
@@ -889,7 +891,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessWarningAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
+        public static DialogResult MsgboxWarningAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
 
         /// <summary>
         /// Show the message box error freedom text Vietnamese.
@@ -897,72 +899,72 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MessErrorAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, VIE);
+        public static DialogResult MsgboxErrorAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, VIE);
         #endregion
 
         #region Animator
         /// <summary>
         /// Show the control with sync effect.
         /// </summary>
-        /// <param name="control">The showing control.</param>
+        /// <param name="ctrl">The showing control.</param>
         /// <param name="animationType">Effect type.</param>
         /// <param name="speed">FPMS.</param>
-        public static void ShowAnimatorSync(Control control, AnimationType animationType, float speed)
+        public static void ShowAnimatorSync(Control ctrl, AnimationType animationType, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
                 AnimationType = animationType
             };
-            animator.ShowSync(control);
+            animator.ShowSync(ctrl);
         }
 
         /// <summary>
         /// Hide the control with sync effect.
         /// </summary>
-        /// <param name="control">The hiding control.</param>
+        /// <param name="ctrl">The hiding control.</param>
         /// <param name="animationType">Effect type.</param>
         /// <param name="speed">FPMS.</param>
-        public static void HideAnimatorSync(Control control, AnimationType animationType, float speed)
+        public static void HideAnimatorSync(Control ctrl, AnimationType animationType, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
                 AnimationType = animationType
             };
-            animator.HideSync(control);
+            animator.HideSync(ctrl);
         }
 
         /// <summary>
         /// Show the control with async effect.
         /// </summary>
-        /// <param name="control">The showing control.</param>
+        /// <param name="ctrl">The showing control.</param>
         /// <param name="animationType">Effect type.</param>
         /// <param name="speed">FPMS.</param>
-        public static void ShowAnimator(Control control, AnimationType animationType, float speed)
+        public static void ShowAnimator(Control ctrl, AnimationType animationType, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
                 AnimationType = animationType
             };
-            animator.Show(control);
+            animator.Show(ctrl);
         }
 
         /// <summary>
         /// Hide the control with async effect.
         /// </summary>
-        /// <param name="control">The hiding control.</param>
+        /// <param name="ctrl">The hiding control.</param>
         /// <param name="animationType">Effect type.</param>
         /// <param name="speed">FPMS.</param>
-        public static void HideAnimator(Control control, AnimationType animationType, float speed)
+        public static void HideAnimator(Control ctrl, AnimationType animationType, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
                 AnimationType = animationType
             };
-            animator.Hide(control);
+            animator.Hide(ctrl);
         }
         #endregion
 
