@@ -183,7 +183,7 @@ namespace YAN_Scripts
         /// <summary>
         /// Green style fill.
         /// </summary>
-        public static void CombR38G126B86F_EnabledChanged(object sender, EventArgs e)
+        public static void CmbR38G126B86F_EnabledChanged(object sender, EventArgs e)
         {
             var cmb = (YANComboBox)sender;
             if (cmb.Enabled)
@@ -201,7 +201,7 @@ namespace YAN_Scripts
         /// <summary>
         /// Violet style border.
         /// </summary>
-        public static void CombMediumPurpleB_EnabledChanged(object sender, EventArgs e)
+        public static void CmbMediumPurpleB_EnabledChanged(object sender, EventArgs e)
         {
             var cmb = (YANComboBox)sender;
             if (cmb.Enabled)
@@ -240,7 +240,7 @@ namespace YAN_Scripts
         /// <summary>
         /// White style border.
         /// </summary>
-        public static void DpaleVioletRedB_EnabledChanged(object sender, EventArgs e)
+        public static void DpPaleVioletRedB_EnabledChanged(object sender, EventArgs e)
         {
             var dp = (YANDatePicker)sender;
             dp.TextColor = ClInvert(dp.TextColor);
@@ -271,7 +271,8 @@ namespace YAN_Scripts
         /// Pink style border.
         /// </summary>
         public static void NbPaleVioletRedB_EnabledChanged(object sender, EventArgs e)
-        {var nb = (YANNumBox)sender;
+        {
+            var nb = (YANNumBox)sender;
             nb.BorderColor = nb.Enabled ? PaleVioletRed : Gray;
         }
 
@@ -279,7 +280,8 @@ namespace YAN_Scripts
         /// Date style border.
         /// </summary>
         public static void NbDodgerBlueB_EnabledChanged(object sender, EventArgs e)
-        {var nb = (YANNumBox)sender;
+        {
+            var nb = (YANNumBox)sender;
             nb.BorderColor = nb.Enabled ? DodgerBlue : Gray;
         }
         #endregion

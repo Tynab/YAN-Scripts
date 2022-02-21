@@ -7,7 +7,7 @@ namespace YAN_Scripts
     public class YANWaiter
     {
         #region Fields
-        private FormWaiter _frm_Waiter;
+        private FormWaiter _frmWaiter;
         private Thread _thread;
         private int _rad;
         private bool _isTop;
@@ -17,8 +17,8 @@ namespace YAN_Scripts
         //loading process
         private void LoadingPrc(object parent)
         {
-            _frm_Waiter = new FormWaiter((Form)parent, _rad, _isTop);
-            _frm_Waiter.ShowDialog();
+            _frmWaiter = new FormWaiter((Form)parent, _rad, _isTop);
+            _frmWaiter.ShowDialog();
         }
 
         /// <summary>
@@ -40,10 +40,10 @@ namespace YAN_Scripts
         /// </summary>
         public void OffLoader()
         {
-            if (_frm_Waiter != null)
+            if (_frmWaiter != null)
             {
-                _frm_Waiter.BeginInvoke(new ThreadStart(_frm_Waiter.FrmCloseToken));
-                _frm_Waiter = null;
+                _frmWaiter.BeginInvoke(new ThreadStart(_frmWaiter.FrmCloseToken));
+                _frmWaiter = null;
                 _thread = null;
             }
         }

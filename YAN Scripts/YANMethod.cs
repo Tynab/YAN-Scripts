@@ -80,7 +80,7 @@ namespace YAN_Scripts
             ntpData[0] = 0x1B;
             using (var socket = new Socket(InterNetwork, Dgram, Udp))
             {
-                socket.ReceiveTimeout = _timeout_;
+                socket.ReceiveTimeout = _timeOut_;
                 socket.Connect(new IPEndPoint(GetHostEntry("time.windows.com").AddressList[0], 123));
                 socket.Send(ntpData);
                 socket.Receive(ntpData);
@@ -92,15 +92,15 @@ namespace YAN_Scripts
         //check date time online stream
         private static DateTime GetDtmOnlStream()
         {
-            var dtmNow = Now;
+            var dtm = Now;
             using (var streamReader = new StreamReader(new TcpClient("time.nist.gov", 13).GetStream()))
             {
                 if (streamReader != null)
                 {
-                    dtmNow = ParseExact(streamReader.ReadToEnd().Substring(7, 17), "yy-MM-dd HH:mm:ss", InvariantCulture, AssumeUniversal);
+                    dtm = ParseExact(streamReader.ReadToEnd().Substring(7, 17), "yy-MM-dd HH:mm:ss", InvariantCulture, AssumeUniversal);
                 }
             }
-            return dtmNow;
+            return dtm;
         }
 
         //check app installer in app list
@@ -169,14 +169,14 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
-        public static double TimeHourFromHm(string hm) => TryParseTimeFromHm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
+        public static double HourFromHm(string hm) => TryParseTimeFromHm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
         /// Covert number to hour and minute text.
         /// </summary>
         /// <param name="min">Minutes.</param>
         /// <returns>Hour and minute text.</returns>
-        public static string HmFromDub(double min)
+        public static string HmFromDouble(double min)
         {
             var timeSpan = FromHours(min);
             return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
@@ -188,18 +188,18 @@ namespace YAN_Scripts
         /// <returns>International date time.</returns>
         public static DateTime DtmOnlAdvanced()
         {
-            var dtmNow = Now;
+            var dtm = Now;
             if (CheckInternetConnect())
             {
                 try
                 {
-                    dtmNow = GetDtmOnlSocket();
+                    dtm = GetDtmOnlSocket();
                 }
                 catch
                 {
                     try
                     {
-                        dtmNow = GetDtmOnlStream();
+                        dtm = GetDtmOnlStream();
                     }
                     catch (Exception ex)
                     {
@@ -207,7 +207,7 @@ namespace YAN_Scripts
                     }
                 }
             }
-            return dtmNow;
+            return dtm;
         }
         #endregion
 
@@ -277,7 +277,7 @@ namespace YAN_Scripts
             try
             {
                 var objWebReq = Create(new Uri("https://www.google.com/"));
-                objWebReq.Timeout = _timeout_;
+                objWebReq.Timeout = _timeOut_;
                 using (var objResp = objWebReq.GetResponse())
                 {
                     objResp.Close();
@@ -780,30 +780,30 @@ namespace YAN_Scripts
         }
         #endregion
 
-        #region Message Box
+        #region MessageBox
         /// <summary>
         /// Show the message box none freedom text.
         /// </summary>
         /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="msg">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxNoneAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
+        public static DialogResult MsgboxNoneAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
 
         /// <summary>
         /// Show the message box infomation freedom text.
         /// </summary>
         /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="msg">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxInfoAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        public static DialogResult MsgboxInfoAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         /// <summary>
         /// Show the message box question freedom text.
         /// </summary>
         /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="msg">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxQuestAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        public static DialogResult MsgboxQuestAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
         /// <summary>
         /// Show the message box warning freedom text.
@@ -811,7 +811,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxWarningAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+        public static DialogResult MsgboxWarningAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         /// <summary>
         /// Show the message box error freedom text.
@@ -819,7 +819,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxErrorAdvanced(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        public static DialogResult MsgboxErrorAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         /// <summary>
         /// Show the message box none freedom text Japanese.
@@ -827,7 +827,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxNoneAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
+        public static DialogResult MsgboxNoneAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
 
         /// <summary>
         /// Show the message box infomation freedom text Japanese.
@@ -835,7 +835,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxInfoAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
+        public static DialogResult MsgboxInfoAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
 
         /// <summary>
         /// Show the message box question freedom text Japanese.
@@ -843,7 +843,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxQuestAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
+        public static DialogResult MsgboxQuestAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
 
         /// <summary>
         /// Show the message box warning freedom text Japanese.
@@ -851,7 +851,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxWarningAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
+        public static DialogResult MsgboxWarningAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
 
         /// <summary>
         /// Show the message box error freedom text Japanese.
@@ -859,7 +859,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxErrorAdvancedJP(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
+        public static DialogResult MsgboxErrorAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
 
         /// <summary>
         /// Show the message box none freedom text Vietnamese.
@@ -867,7 +867,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxNoneAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
+        public static DialogResult MsgboxNoneAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
 
         /// <summary>
         /// Show the message box infomation freedom text Vietnamese.
@@ -875,7 +875,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxInfoAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
+        public static DialogResult MsgboxInfoAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
 
         /// <summary>
         /// Show the message box question freedom text Vietnamese.
@@ -883,7 +883,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxQuestAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
+        public static DialogResult MsgboxQuestAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
 
         /// <summary>
         /// Show the message box warning freedom text Vietnamese.
@@ -891,7 +891,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxWarningAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
+        public static DialogResult MsgboxWarningAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
 
         /// <summary>
         /// Show the message box error freedom text Vietnamese.
@@ -899,7 +899,7 @@ namespace YAN_Scripts
         /// <param name="cap">Caption of message.</param>
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxErrorAdvancedVN(string cap, string mess) => Show(mess, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, VIE);
+        public static DialogResult MsgboxErrorAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, VIE);
         #endregion
 
         #region Animator

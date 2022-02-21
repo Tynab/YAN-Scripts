@@ -7,7 +7,7 @@ namespace YAN_Scripts
     public class YANLoader
     {
         #region Fields
-        private FormLoader _frm_Loader;
+        private FormLoader _frmLoader;
         private Thread _thread;
         private int _rad;
         private bool _isTop;
@@ -16,8 +16,8 @@ namespace YAN_Scripts
         #region Methods
         private void LoadingPrc(object parent)
         {
-            _frm_Loader = new FormLoader((Form)parent, _rad, _isTop);
-            _frm_Loader.ShowDialog();
+            _frmLoader = new FormLoader((Form)parent, _rad, _isTop);
+            _frmLoader.ShowDialog();
         }
 
         /// <summary>
@@ -39,10 +39,10 @@ namespace YAN_Scripts
         /// </summary>
         public void OffLoader()
         {
-            if (_frm_Loader != null)
+            if (_frmLoader != null)
             {
-                _frm_Loader.BeginInvoke(new ThreadStart(_frm_Loader.FrmCloseToken));
-                _frm_Loader = null;
+                _frmLoader.BeginInvoke(new ThreadStart(_frmLoader.FrmCloseToken));
+                _frmLoader = null;
                 _thread = null;
             }
         }
