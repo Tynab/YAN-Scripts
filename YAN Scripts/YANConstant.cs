@@ -23,8 +23,9 @@ namespace YAN_Scripts
         public const string _dateFormatName_ = "dd-MM-yyyy";
         public const string _dateFormatPara_ = "dd.MM.yyyy";
         public const string _timezoneVN_ = "07:00:00";
-        public const string _formatTextXl_ = "@";
-        public const string _formatTextCode = "Unicode Text";
+        public const string _xlFormatText_ = "@";
+        public const string _xlFormatNum_ = "#,##0";
+        public const string _codeFormatText = "Unicode Text";
         public const string _fontDoc_ = "Times New Roman";
         public const float _animatorSpeed_ = 0.02f;
         public const int _timeAnimate_ = 500;

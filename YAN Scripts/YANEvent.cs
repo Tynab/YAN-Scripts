@@ -170,6 +170,15 @@ namespace YAN_Scripts
         }
 
         /// <summary>
+        /// Pink style border.
+        /// </summary>
+        public static void BtnHotPinkB_EnabledChanged(object sender, EventArgs e)
+        {
+            var btn = (YANButton)sender;
+            btn.BorderColor = btn.Enabled ? HotPink : Gray;
+        }
+
+        /// <summary>
         /// Green icon style fill.
         /// </summary>
         public static void BtnR40G159B93F_EnabledChanged(object sender, EventArgs e)
