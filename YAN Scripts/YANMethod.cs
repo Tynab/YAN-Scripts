@@ -153,7 +153,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="dtmText">Date time string format.</param>
         /// <param name="dtmFormat">Format of string date time.</param>
-        /// <returns>Date time.</returns>
+        /// <returns>Done or failed.</returns>
         public static bool TryParseExactUpgrade(string dtmText, string dtmFormat, out DateTime dtm) => TryParseExact(dtmText, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
 
         /// <summary>
@@ -360,6 +360,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="dts">All datatables in array.</param>
         /// <param name="dt">Datatable to.</param>
+        /// <param name="length">Length of array.</param>
         public static void DtAll41(DataTable[] dts, DataTable dt, int length)
         {
             for (var i = 0; i < length; i++)
