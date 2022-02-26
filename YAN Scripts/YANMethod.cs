@@ -41,6 +41,7 @@ using static System.Reflection.BindingFlags;
 using static System.Threading.Tasks.Parallel;
 using static System.TimeSpan;
 using static System.Windows.Forms.Clipboard;
+using static System.Windows.Forms.Cursor;
 using static System.Windows.Forms.DataGridViewAutoSizeColumnsMode;
 using static System.Windows.Forms.DataGridViewClipboardCopyMode;
 using static System.Windows.Forms.DialogResult;
@@ -154,7 +155,7 @@ namespace YAN_Scripts
         /// <param name="dtmText">Date time string format.</param>
         /// <param name="dtmFormat">Format of string date time.</param>
         /// <returns>Done or failed.</returns>
-        public static bool TryParseExactUpgrade(string dtmText, string dtmFormat, out DateTime dtm) => TryParseExact(dtmText, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
+        public static bool DtmTryParseExact(string dtmText, string dtmFormat, out DateTime dtm) => TryParseExact(dtmText, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
 
         /// <summary>
         /// Convert hour and minute text to date time format.
@@ -162,21 +163,21 @@ namespace YAN_Scripts
         /// <param name="hm">Hour and minute text.</param>
         /// <param name="dtm">Time format.</param>
         /// <returns>Done or failed.</returns>
-        public static bool TryParseTimeFromHm(string hm, out DateTime dtm) => TryParseExactUpgrade(hm, "HH:mm", out dtm) || TryParseExactUpgrade(hm, "h:mm", out dtm) || TryParseExactUpgrade(hm, "HH:m", out dtm) || TryParseExactUpgrade(hm, "h:m", out dtm);
+        public static bool DtmTryParseFromHm(string hm, out DateTime dtm) => DtmTryParseExact(hm, "HH:mm", out dtm) || DtmTryParseExact(hm, "h:mm", out dtm) || DtmTryParseExact(hm, "HH:m", out dtm) || DtmTryParseExact(hm, "h:m", out dtm);
 
         /// <summary>
         /// Convert hour and minute text to time hour.
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
-        public static double HourFromHm(string hm) => TryParseTimeFromHm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
+        public static double HourParseFromHm(string hm) => DtmTryParseFromHm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
         /// Covert number to hour and minute text.
         /// </summary>
         /// <param name="min">Minutes.</param>
         /// <returns>Hour and minute text.</returns>
-        public static string HmFromDouble(double min)
+        public static string HmParseFromMinute(double min)
         {
             var timeSpan = FromHours(min);
             return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
@@ -225,6 +226,17 @@ namespace YAN_Scripts
         /// <param name="val">Number.</param>
         /// <returns>Rounded number.</returns>
         public static double RoundDownPoint5(double val) => Floor(val * 2) / 2;
+
+        /// <summary>
+        /// Convert string to double.
+        /// </summary>
+        /// <param name="num">Number text.</param>
+        /// <returns>Number double.</returns>
+        public static double DoubleParse(string num)
+        {
+            double.TryParse(num, out var val);
+            return val;
+        }
 
         /// <summary>
         /// Find min value.
@@ -782,6 +794,20 @@ namespace YAN_Scripts
         #endregion
 
         #region MessageBox
+        /// <summary>
+        /// Show the message box error catch.
+        /// </summary>
+        /// <param name="ex">Exception.</param>
+        public static void MsgBoxErrorCatch(string ex)
+        {
+            MessageBox.Show(new Form
+            {
+                StartPosition = FormStartPosition.Manual,
+                Location = new Point(Position.X, Position.Y),
+                TopMost = true
+            }, ex.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         /// <summary>
         /// Show the message box none freedom text.
         /// </summary>
