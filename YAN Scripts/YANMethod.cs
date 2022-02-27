@@ -316,10 +316,18 @@ namespace YAN_Scripts
         /// Datatable search row index.
         /// </summary>
         /// <param name="dt">Datatable source.</param>
-        /// <param name="dcHeader">Column header.</param>
+        /// <param name="dcName">Name of column</param>
         /// <param name="searchText">Value to search.</param>
         /// <returns>Index of row datatable.</returns>
-        public static int DtSearchRow(DataTable dt, string dcHeader, string searchText) => dt.Rows.IndexOf(dt.Select($"{dcHeader} = '{searchText}'")[0]);
+        public static int DtSearchRow(DataTable dt, string dcName, string searchText) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{searchText}'")[0]);
+
+        /// <summary>
+        /// Datatable numeric column sort.
+        /// </summary>
+        /// <param name="dt">Datatable source.</param>
+        /// <param name="dcName">Name of column</param>
+        /// <returns>Datatable sorted.</returns>
+        public static DataTable DtSortNumCol(DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
 
         /// <summary>
         /// Datatable add new row with default value.
@@ -368,6 +376,31 @@ namespace YAN_Scripts
         public static void DtTransReverseData(DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dt, OverwriteChanges);
 
         /// <summary>
+        /// Copy datatable to clipboard.
+        /// </summary>
+        /// <param name="dt">Datatable source.</param>
+        public static void Dt2Clipboard(DataTable dt)
+        {
+            using (var frm = new Form
+            {
+                Opacity = 0,
+                ShowInTaskbar = false
+            })
+            {
+                var dgv = new DataGridView
+                {
+                    ClipboardCopyMode = EnableWithoutHeaderText,
+                    DataSource = dt
+                };
+                frm.Controls.Add(dgv);
+                frm.Show();
+                dgv.SelectAll();
+                var ods = dgv.GetClipboardContent().GetText();
+                SetText(ods);
+            }
+        }
+
+        /// <summary>
         /// Datatable merge all.
         /// </summary>
         /// <param name="dts">All datatables in array.</param>
@@ -394,31 +427,6 @@ namespace YAN_Scripts
             if (!TerminalServerSession)
             {
                 dgv.GetType().GetProperty("DoubleBuffered", Instance | NonPublic).SetValue(dgv, state, null);
-            }
-        }
-
-        /// <summary>
-        /// Copy datatable to clipboard.
-        /// </summary>
-        /// <param name="dt">Datatable source.</param>
-        public static void Dt2Clipboard(DataTable dt)
-        {
-            using (var frm = new Form
-            {
-                Opacity = 0,
-                ShowInTaskbar = false
-            })
-            {
-                var dgv = new DataGridView
-                {
-                    ClipboardCopyMode = EnableWithoutHeaderText,
-                    DataSource = dt
-                };
-                frm.Controls.Add(dgv);
-                frm.Show();
-                dgv.SelectAll();
-                var ods = dgv.GetClipboardContent().GetText();
-                SetText(ods);
             }
         }
 
