@@ -210,6 +210,14 @@ namespace YAN_Scripts
             }
             return dtm;
         }
+
+        /// <summary>
+        /// Total month between 2 date.
+        /// </summary>
+        /// <param name="dtmStart">Start date.</param>
+        /// <param name="dtmEnd">End date.</param>
+        /// <returns></returns>
+        public static int DtmTotalMonth2(DateTime dtmStart, DateTime dtmEnd) => (dtmEnd.Year - dtmStart.Year) * 12 + dtmEnd.Month - dtmStart.Month;
         #endregion
 
         #region Math
@@ -235,6 +243,17 @@ namespace YAN_Scripts
         public static double DoubleParse(string num)
         {
             double.TryParse(num, out var val);
+            return val;
+        }
+
+        /// <summary>
+        /// Convert string to int.
+        /// </summary>
+        /// <param name="num">Number text.</param>
+        /// <returns>Number int.</returns>
+        public static int IntParse(string num)
+        {
+            int.TryParse(num, out var val);
             return val;
         }
 
@@ -310,7 +329,7 @@ namespace YAN_Scripts
         /// <typeparam name="T">Data type.</typeparam>
         /// <param name="obj">Object value.</param>
         /// <returns>Converted value.</returns>
-        public static T ConvertValFromDb<T>(object obj) => obj == null || obj == Value ? default : (T)obj;
+        public static T ValFromDb<T>(object obj) => obj == null || obj == Value ? default : (T)obj;
 
         /// <summary>
         /// Datatable search row index.
@@ -415,6 +434,30 @@ namespace YAN_Scripts
                     DtTransData(dts[i], dt);
                 }
             }
+        }
+
+        /// <summary>
+        /// Convert datagridview to data table.
+        /// </summary>
+        /// <param name="dgv">Datagridview.</param>
+        /// <returns>Datatable</returns>
+        public static DataTable Dgv2Dt(DataGridView dgv)
+        {
+            var dt = new DataTable();
+            foreach (DataGridViewColumn dgvc in dgv.Columns)
+            {
+                dt.Columns.Add(dgvc.Name);
+            }
+            foreach (DataGridViewRow dgvr in dgv.Rows)
+            {
+                var dr = dt.NewRow();
+                foreach (DataGridViewCell cell in dgvr.Cells)
+                {
+                    dr[cell.ColumnIndex] = cell.Value;
+                }
+                dt.Rows.Add(dr);
+            }
+            return dt;
         }
 
         /// <summary>
@@ -849,6 +892,14 @@ namespace YAN_Scripts
         public static DialogResult MsgboxWarningAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         /// <summary>
+        /// Show the message box exclamation freedom text.
+        /// </summary>
+        /// <param name="cap">Caption of message.</param>
+        /// <param name="mess">Text content.</param>
+        /// <returns>Dialog result.</returns>
+        public static DialogResult MsgboxExclamationAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+        /// <summary>
         /// Show the message box error freedom text.
         /// </summary>
         /// <param name="cap">Caption of message.</param>
@@ -889,6 +940,14 @@ namespace YAN_Scripts
         public static DialogResult MsgboxWarningAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
 
         /// <summary>
+        /// Show the message box exclamation freedom text Japanese.
+        /// </summary>
+        /// <param name="cap">Caption of message.</param>
+        /// <param name="mess">Text content.</param>
+        /// <returns>Dialog result.</returns>
+        public static DialogResult MsgboxExclamationAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, JAP);
+
+        /// <summary>
         /// Show the message box error freedom text Japanese.
         /// </summary>
         /// <param name="cap">Caption of message.</param>
@@ -927,6 +986,14 @@ namespace YAN_Scripts
         /// <param name="mess">Text content.</param>
         /// <returns>Dialog result.</returns>
         public static DialogResult MsgboxWarningAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
+
+        /// <summary>
+        /// Show the message box exclamation freedom text Vietnamese.
+        /// </summary>
+        /// <param name="cap">Caption of message.</param>
+        /// <param name="mess">Text content.</param>
+        /// <returns>Dialog result.</returns>
+        public static DialogResult MsgboxExclamationAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, VIE);
 
         /// <summary>
         /// Show the message box error freedom text Vietnamese.

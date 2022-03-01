@@ -238,7 +238,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Pink style border.
+        /// White style fill.
         /// </summary>
         public static void DpWhiteF_EnabledChanged(object sender, EventArgs e)
         {
@@ -292,6 +292,35 @@ namespace YAN_Scripts
         {
             var nb = (YANNumBox)sender;
             nb.BorderColor = nb.Enabled ? DodgerBlue : Gray;
+        }
+        #endregion
+
+        #region RadioButton Enable Changed Color
+        /// <summary>
+        /// Blue style border.
+        /// </summary>
+        public static void RdoHotPink_EnabledChanged(object sender, EventArgs e)
+        {
+            var rdo = (YANRadioButton)sender;
+            rdo.CheckedColor = rdo.Enabled ? HotPink : Gray;
+        }
+
+        /// <summary>
+        /// Green style border.
+        /// </summary>
+        public static void RdoMediumSpringGreen_EnabledChanged(object sender, EventArgs e)
+        {
+            var rdo = (YANRadioButton)sender;
+            rdo.CheckedColor = rdo.Enabled ? MediumSpringGreen : Gray;
+        }
+
+        /// <summary>
+        /// Orange style border.
+        /// </summary>
+        public static void RdoCoral_EnabledChanged(object sender, EventArgs e)
+        {
+            var rdo = (YANRadioButton)sender;
+            rdo.CheckedColor = rdo.Enabled ? Coral : Gray;
         }
         #endregion
 
