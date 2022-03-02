@@ -61,5 +61,37 @@ namespace YAN_Scripts
             AW_BLEND = 0x00080000
         }
         #endregion
+
+        #region Range
+        public static readonly string[] ZeroLeftPadding =
+        {
+            "",
+            "00",
+            "0"
+        };
+        public static readonly string[] Digits =
+        {
+            "không",
+            "một",
+            "hai",
+            "ba",
+            "bốn",
+            "năm",
+            "sáu",
+            "bảy",
+            "tám",
+            "chín"
+        };
+        public static readonly string[] MultipleThousand =
+        {
+            "",
+            "nghìn",
+            "triệu",
+            "tỷ",
+            "nghìn tỷ",
+            "triệu tỷ",
+            "tỷ tỷ"
+        };
+        #endregion
     }
 }

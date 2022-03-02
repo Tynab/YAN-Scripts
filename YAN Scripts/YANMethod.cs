@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using YAN_Controls;
@@ -31,6 +32,7 @@ using static System.Globalization.DateTimeStyles;
 using static System.IO.Directory;
 using static System.IO.File;
 using static System.IO.Path;
+using static System.Linq.Enumerable;
 using static System.Math;
 using static System.Net.Dns;
 using static System.Net.Sockets.AddressFamily;
@@ -56,9 +58,71 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace YAN_Scripts
 {
-    public class YANMethod
+    public static class YANMethod
     {
         #region Function
+        //chunked
+        private static IEnumerable<string> Chunked(this string text, int chunkSize) => Range(0, text.Length / chunkSize).Select(i => text.Substring(i * chunkSize, chunkSize));
+
+        //zero hunderd
+        private static bool ShouldShowZeroHundred(this string[] groups) => groups.Reverse().TakeWhile(it => it == "000").Count() < groups.Count() - 1;
+
+        //deconstruct
+        internal static void Deconstruct<T>(this IReadOnlyList<T> items, out T t0, out T t1, out T t2)
+        {
+            t0 = items.Count > 0 ? items[0] : default;
+            t1 = items.Count > 1 ? items[1] : default;
+            t2 = items.Count > 2 ? items[2] : default;
+        }
+
+        //read pair
+        private static string ReadPair(int b, int c)
+        {
+            return b switch
+            {
+                0 => c == 0 ? "" : " lẻ " + Digits[c],
+                1 => "mười " + c switch
+                {
+                    0 => "",
+                    5 => "lăm",
+                    _ => Digits[c]
+                },
+                _ => Digits[b] + " mươi " + c switch
+                {
+                    0 => "",
+                    1 => "mốt",
+                    4 => "tư",
+                    5 => "lăm",
+                    _ => Digits[c]
+                }
+            };
+        }
+
+        //read triple
+        private static string ReadTriple(string triple, bool showZeroHundred)
+        {
+            var (a, b, c) = triple.Select(ch => int.Parse(ch.ToString())).ToArray();
+            return a switch
+            {
+                0 when b == 0 && c == 0 => "",
+                0 when showZeroHundred => "không trăm " + ReadPair(b, c),
+                0 when b == 0 => Digits[c],
+                0 => ReadPair(b, c),
+                _ => Digits[a] + " trăm " + ReadPair(b, c)
+            };
+        }
+
+        //capitalize
+        private static string Capitalize(this string input)
+        {
+            return input switch
+            {
+                null => throw new ArgumentNullException(nameof(input)),
+                "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
+                _ => input.First().ToString().ToUpper() + input.Substring(1).ToLower()
+            };
+        }
+
         //reset win question
         private static void ResetWinQuest()
         {
@@ -479,6 +543,30 @@ namespace YAN_Scripts
         /// <param name="dgv">DataGridView.</param>
         /// <param name="state">State of setting.</param>
         public static void DgvAutoSizeMod(DataGridView dgv, bool state) => dgv.AutoSizeColumnsMode = state ? AllCells : DataGridViewAutoSizeColumnsMode.None;
+
+        /// <summary>
+        /// Reboot no. datagridview columns lock source data.
+        /// </summary>
+        /// <param name="dgv">Datagridview.</param>
+        public static void DgvSrcDataRebootNo(DataGridView dgv)
+        {
+            foreach (DataGridViewRow dgvr in dgv.Rows)
+            {
+                dgvr.Cells[0].Value = dgvr.Index + 1;
+            }
+        }
+
+        /// <summary>
+        /// Reboot no. datagridview columns free data.
+        /// </summary>
+        /// <param name="dgv">Datagridview.</param>
+        public static void DgvFreeDataRebootNo(DataGridView dgv)
+        {
+            for (var i = 0; i < dgv.RowCount - 1; i++)
+            {
+                dgv.Rows[i].Cells[0].Value = i + 1;
+            }
+        }
         #endregion
 
         #region Window
@@ -532,6 +620,37 @@ namespace YAN_Scripts
         /// <param name="text">Text value.</param>
         /// <returns>Text converted.</returns>
         public static string ToTitleCaseUpgrade(string text) => CurrentCulture.TextInfo.ToTitleCase(text);
+
+        /// <summary>
+        /// Number to Vietnamese words.
+        /// </summary>
+        /// <param name="num">Number translate.</param>
+        /// <returns>Translate text.</returns>
+        public static string ToVietnameseWords(this int num)
+        {
+            if (num == 0)
+            {
+                return "Không";
+            }
+            if (num < 0)
+            {
+                return "Âm " + (-num).ToVietnameseWords().ToLower();
+            }
+            var str = num.ToString();
+            var groups = (ZeroLeftPadding[str.Length % 3] + str).Chunked(3).ToArray();
+            var index = -1;
+            var rawResult = groups.Aggregate("", (acc, e) =>
+            {
+                checked
+                {
+                    index++;
+                }
+                var readTriple = ReadTriple(e, groups.ShouldShowZeroHundred() && index > 0);
+                var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - index) ?? "");
+                return $"{acc} {readTriple} {multipleThousand} ";
+            });
+            return Regex.Replace(rawResult, "\\s+", " ").Trim().Capitalize(); //replace white space with a specified character
+        }
         #endregion
 
         #region Process
