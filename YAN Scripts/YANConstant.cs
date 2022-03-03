@@ -16,10 +16,9 @@ namespace YAN_Scripts
         public static readonly Color _clTitXl_ = FromArgb(0, 122, 204);
         public const string _trueVie_ = "Có";
         public const string _falseVie_ = "Không";
-        public const string _namePrcXl_ = "excel";
+        public const string _prcXl_ = "excel";
         public const string _nameCo_ = "Nephilim";
         public const string _numFormat_ = "N0";
-        public const string _dateFormat_ = "dd/MM/yyyy";
         public const string _dateFormatName_ = "dd-MM-yyyy";
         public const string _dateFormatPara_ = "dd.MM.yyyy";
         public const string _timezoneVN_ = "07:00:00";

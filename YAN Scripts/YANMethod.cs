@@ -61,13 +61,81 @@ namespace YAN_Scripts
     public static class YANMethod
     {
         #region Function
-        //chunked
+        //xac nhận reset máy
+        private static void ResetVerify()
+        {
+            if (MsgboxQuestAdvancedVN("HỎI", "Lỗi ứng dụng chạy ngầm, khởi động lại hệ thống để khắc phục?") == Yes)
+            {
+                AlarmWin(Restart, 3);
+            }
+        }
+
+        //căt ảnh
+        private static Image CropImg(Image img, Rectangle rect) => ((Bitmap)img).Clone(rect, img.PixelFormat);
+
+        //hoán đổi
+        private static uint SwapEndianness(ulong x) => (uint)(((x & 0x000000ff) << 24) + ((x & 0x0000ff00) << 8) + ((x & 0x00ff0000) >> 8) + ((x & 0xff000000) >> 24));
+
+        //lấy datetime online socket
+        private static DateTime GetDtmOnlSocket()
+        {
+            var ntpData = new byte[48];
+            ntpData[0] = 0x1B;
+            using (var socket = new Socket(InterNetwork, Dgram, Udp))
+            {
+                socket.ReceiveTimeout = _timeOut_;
+                socket.Connect(new IPEndPoint(GetHostEntry("time.windows.com").AddressList[0], 123));
+                socket.Send(ntpData);
+                socket.Receive(ntpData);
+                socket.Close();
+            }
+            return new DateTime(1900, 1, 1, 0, 0, 0, Utc).AddMilliseconds(SwapEndianness(ToUInt32(ntpData, 40)) * 1000 + SwapEndianness(ToUInt32(ntpData, 44)) * 1000 / 0x100000000L).ToLocalTime();
+        }
+
+        //lấy datetime online stream
+        private static DateTime GetDtmOnlStream()
+        {
+            var dtm = Now;
+            using (var streamReader = new StreamReader(new TcpClient("time.nist.gov", 13).GetStream()))
+            {
+                if (streamReader != null)
+                {
+                    dtm = ParseExact(streamReader.ReadToEnd().Substring(7, 17), "yy-MM-dd HH:mm:ss", InvariantCulture, AssumeUniversal);
+                }
+            }
+            return dtm;
+        }
+
+        //check app installer trong app list
+        private static bool CheckAppInList(string name, string address)
+        {
+            var check = false;
+            var key = LocalMachine.OpenSubKey(address);
+            if (key != null)
+            {
+                ForEach(key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)), (subkey, state) =>
+                {
+                    var displayName = (string)subkey.GetValue("DisplayName");
+                    if (displayName != null && displayName.Contains(name))
+                    {
+                        check = true;
+                        state.Stop();
+                    }
+                });
+                key.Close();
+            }
+            return check;
+        }
+        #endregion
+
+        #region Vietnamese Format
+        //fân khuc
         private static IEnumerable<string> Chunked(this string text, int chunkSize) => Range(0, text.Length / chunkSize).Select(i => text.Substring(i * chunkSize, chunkSize));
 
-        //zero hunderd
+        //không trăm
         private static bool ShouldShowZeroHundred(this string[] groups) => groups.Reverse().TakeWhile(it => it == "000").Count() < groups.Count() - 1;
 
-        //deconstruct
+        //zải cấu truc (private của function number to vietnamese words)
         internal static void Deconstruct<T>(this IReadOnlyList<T> items, out T t0, out T t1, out T t2)
         {
             t0 = items.Count > 0 ? items[0] : default;
@@ -75,7 +143,7 @@ namespace YAN_Scripts
             t2 = items.Count > 2 ? items[2] : default;
         }
 
-        //read pair
+        //băt cặp
         private static string ReadPair(int b, int c)
         {
             return b switch
@@ -98,7 +166,7 @@ namespace YAN_Scripts
             };
         }
 
-        //read triple
+        //bộ 3
         private static string ReadTriple(string triple, bool showZeroHundred)
         {
             var (a, b, c) = triple.Select(ch => int.Parse(ch.ToString())).ToArray();
@@ -112,7 +180,7 @@ namespace YAN_Scripts
             };
         }
 
-        //capitalize
+        //viêt hoa
         private static string Capitalize(this string input)
         {
             return input switch
@@ -123,83 +191,69 @@ namespace YAN_Scripts
             };
         }
 
-        //reset win question
-        private static void ResetWinQuest()
+        /// <summary>
+        /// Chuyển số sang chữ Việt.
+        /// </summary>
+        /// <param name="num">Số cần chuyển</param>
+        /// <returns>Chuỗi số bằng chữ tiếng Việt.</returns>
+        public static string ToWordsVn(this int num)
         {
-            if (MsgboxQuestAdvancedVN("HỎI", "Lỗi ứng dụng chạy ngầm, khởi động lại hệ thống để khắc phục?") == Yes)
+            if (num == 0)
             {
-                AlarmWin(Restart, 3);
+                return "Không";
             }
-        }
-
-        //crop image
-        private static Image CropImg(Image img, Rectangle rect) => ((Bitmap)img).Clone(rect, img.PixelFormat);
-
-        //time trans
-        private static uint SwapEndianness(ulong x) => (uint)(((x & 0x000000ff) << 24) + ((x & 0x0000ff00) << 8) + ((x & 0x00ff0000) >> 8) + ((x & 0xff000000) >> 24));
-
-        //check date time online socket
-        private static DateTime GetDtmOnlSocket()
-        {
-            var ntpData = new byte[48];
-            ntpData[0] = 0x1B;
-            using (var socket = new Socket(InterNetwork, Dgram, Udp))
+            if (num < 0)
             {
-                socket.ReceiveTimeout = _timeOut_;
-                socket.Connect(new IPEndPoint(GetHostEntry("time.windows.com").AddressList[0], 123));
-                socket.Send(ntpData);
-                socket.Receive(ntpData);
-                socket.Close();
+                return "Âm " + (-num).ToWordsVn().ToLower();
             }
-            return new DateTime(1900, 1, 1, 0, 0, 0, Utc).AddMilliseconds(SwapEndianness(ToUInt32(ntpData, 40)) * 1000 + SwapEndianness(ToUInt32(ntpData, 44)) * 1000 / 0x100000000L).ToLocalTime();
-        }
-
-        //check date time online stream
-        private static DateTime GetDtmOnlStream()
-        {
-            var dtm = Now;
-            using (var streamReader = new StreamReader(new TcpClient("time.nist.gov", 13).GetStream()))
+            var str = num.ToString();
+            var groups = (ZeroLeftPadding[str.Length % 3] + str).Chunked(3).ToArray();
+            var index = -1;
+            var rawResult = groups.Aggregate("", (acc, e) =>
             {
-                if (streamReader != null)
+                checked
                 {
-                    dtm = ParseExact(streamReader.ReadToEnd().Substring(7, 17), "yy-MM-dd HH:mm:ss", InvariantCulture, AssumeUniversal);
+                    index++;
                 }
-            }
-            return dtm;
+                var readTriple = ReadTriple(e, groups.ShouldShowZeroHundred() && index > 0);
+                var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - index) ?? "");
+                return $"{acc} {readTriple} {multipleThousand} ";
+            });
+            return Regex.Replace(rawResult, "\\s+", " ").Trim().Capitalize(); //replace white space with a specified character
         }
 
-        //check app installer in app list
-        private static bool CheckAppList(string name, string address)
-        {
-            var check = false;
-            var key = LocalMachine.OpenSubKey(address);
-            if (key != null)
-            {
-                ForEach(key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)), (subkey, state) =>
-                {
-                    var displayName = (string)subkey.GetValue("DisplayName");
-                    if (displayName != null && displayName.Contains(name))
-                    {
-                        check = true;
-                        state.Stop();
-                    }
-                });
-                key.Close();
-            }
-            return check;
-        }
+        /// <summary>
+        /// Chuyển ngày sang chuỗi định dạng Việt.
+        /// </summary>
+        /// <param name="dtm">Ngày cần chuyển.</param>
+        /// <returns>Chuỗi định dạng ngày Việt.</returns>
+        public static string ToDateStringVn(this DateTime dtm) => dtm.ToString("dd/MM/yyyy");
+
+        /// <summary>
+        /// Chuyển ngày sang chuỗi định dạng Việt dùng để đặt tên file.
+        /// </summary>
+        /// <param name="dtm">Ngày cần chuyển.</param>
+        /// <returns>Chuỗi định dạng ngày Việt để đặt tên file.</returns>
+        public static string ToDateStringNameVn(this DateTime dtm) => dtm.ToString("dd-MM-yyyy");
+
+        /// <summary>
+        /// Chuyển ngày sang chuỗi định dạng Việt theo kiểu từ ngày đến ngày.
+        /// </summary>
+        /// <param name="dtm">Ngày cần chuyển.</param>
+        /// <returns>Chuỗi định dạng ngày Việt theo kiểu từ ngày đến ngày.</returns>
+        public static string ToDateStringMultiVn(this DateTime dtm) => dtm.ToString("dd.MM.yyyy");
         #endregion
 
         #region Ellipse Form
         /// <summary>
-        /// Mod form round ellipse.
+        /// Tạo khung ellipse cho form.
         /// </summary>
-        /// <param name="nLRect">Left path.</param>
-        /// <param name="nTRect">Top path.</param>
-        /// <param name="nRRect">Right path.</param>
-        /// <param name="nBRect">Bot path.</param>
-        /// <param name="nWEllipse">Width path.</param>
-        /// <param name="nHElippse">Height path.</param>
+        /// <param name="nLRect">Tọa độ trái.</param>
+        /// <param name="nTRect">Tọa độ trên.</param>
+        /// <param name="nRRect">Tọa độ phải.</param>
+        /// <param name="nBRect">Tọa độ dưới.</param>
+        /// <param name="nWEllipse">Độ rộng.</param>
+        /// <param name="nHElippse">Độ cao.</param>
         /// <returns>Platform specific.</returns>
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         public static extern IntPtr CreateRoundRectRgn(int nLRect, int nTRect, int nRRect, int nBRect, int nWEllipse, int nHElippse);
@@ -207,54 +261,54 @@ namespace YAN_Scripts
 
         #region Date Time
         /// <summary>
-        /// Get week of year.
+        /// Lấy số tuần của năm dựa trên ngày.
         /// </summary>
-        /// <param name="dtm">Date count.</param>
-        /// <returns>Num of week.</returns>
-        public static int GetWoyUpgrade(DateTime dtm) => CurrentInfo.Calendar.GetWeekOfYear(dtm, CurrentInfo.CalendarWeekRule, CurrentInfo.FirstDayOfWeek);
+        /// <param name="dtm">Ngày mục tiêu.</param>
+        /// <returns>Số thứ tự tuần chứa ngày mục tiêu trong năm.</returns>
+        public static int WeekOfYear(this DateTime dtm) => CurrentInfo.Calendar.GetWeekOfYear(dtm, CurrentInfo.CalendarWeekRule, CurrentInfo.FirstDayOfWeek);
 
         /// <summary>
-        /// Covert string to date time.
+        /// Chuyển chuỗi sang ngày giờ mở rộng.
         /// </summary>
-        /// <param name="dtmText">Date time string format.</param>
-        /// <param name="dtmFormat">Format of string date time.</param>
-        /// <returns>Done or failed.</returns>
-        public static bool DtmTryParseExact(string dtmText, string dtmFormat, out DateTime dtm) => TryParseExact(dtmText, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <param name="dtmFormat">Định dạng ngày của chuỗi.</param>
+        /// <returns>Thành công hoặc thất bại.</returns>
+        public static bool TryParseExactEx(this string str, string dtmFormat, out DateTime dtm) => TryParseExact(str, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
 
         /// <summary>
-        /// Convert hour and minute text to date time format.
+        /// Chuyển chuỗi giờ phút sang giờ.
         /// </summary>
-        /// <param name="hm">Hour and minute text.</param>
-        /// <param name="dtm">Time format.</param>
-        /// <returns>Done or failed.</returns>
-        public static bool DtmTryParseFromHm(string hm, out DateTime dtm) => DtmTryParseExact(hm, "HH:mm", out dtm) || DtmTryParseExact(hm, "h:mm", out dtm) || DtmTryParseExact(hm, "HH:m", out dtm) || DtmTryParseExact(hm, "h:m", out dtm);
+        /// <param name="hhmm">Chuỗi cần chuyển.</param>
+        /// <param name="dtm">Giờ kết quả</param>
+        /// <returns>Thành công hoặc thất bại.</returns>
+        public static bool TryParseFromHhmm(this string hhmm, out DateTime dtm) => hhmm.TryParseExactEx("HH:mm", out dtm) || hhmm.TryParseExactEx("h:mm", out dtm) || hhmm.TryParseExactEx("HH:m", out dtm) || hhmm.TryParseExactEx("h:m", out dtm);
 
         /// <summary>
-        /// Convert hour and minute text to time hour.
+        /// Chuyển chuỗi giờ phút sang số giờ.
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
-        public static double HourParseFromHm(string hm) => DtmTryParseFromHm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
+        public static double ParseFromHhmm(this string hm) => hm.TryParseFromHhmm(out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
-        /// Covert number to hour and minute text.
+        /// Chuyển số phút sang chuỗi giờ phút.
         /// </summary>
-        /// <param name="min">Minutes.</param>
-        /// <returns>Hour and minute text.</returns>
-        public static string HmParseFromMinute(double min)
+        /// <param name="mm">Số phút cần chuyển.</param>
+        /// <returns>Chuỗi giờ phút</returns>
+        public static string ToHhmmFromMm(this double mm)
         {
-            var timeSpan = FromHours(min);
+            var timeSpan = FromHours(mm);
             return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
         }
 
         /// <summary>
-        /// Get date time online.
+        /// Lấy ngày giờ online nâng cấp.
         /// </summary>
-        /// <returns>International date time.</returns>
-        public static DateTime DtmOnlAdvanced()
+        /// <returns>Ngày giờ quốc tế.</returns>
+        public static DateTime DtmOnlAdv()
         {
             var dtm = Now;
-            if (CheckInternetConnect())
+            if (CheckInternet())
             {
                 try
                 {
@@ -276,98 +330,94 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Total month between 2 date.
+        /// Tính số tháng giữa 2 ngày.
         /// </summary>
-        /// <param name="dtmStart">Start date.</param>
-        /// <param name="dtmEnd">End date.</param>
-        /// <returns></returns>
-        public static int DtmTotalMonth2(DateTime dtmStart, DateTime dtmEnd) => (dtmEnd.Year - dtmStart.Year) * 12 + dtmEnd.Month - dtmStart.Month;
+        /// <param name="dtmFront">Ngày trước.</param>
+        /// <param name="dtmBack">Ngày sau.</param>
+        /// <returns>Số tháng được tính.</returns>
+        public static int DtmTotalMonth(DateTime dtmFront, DateTime dtmBack) => (dtmBack.Year - dtmFront.Year) * 12 + dtmBack.Month - dtmFront.Month;
         #endregion
 
         #region Math
         /// <summary>
-        /// Round up span 0.5.
+        /// Làm tròn lên 0.5.
         /// </summary>
-        /// <param name="val">Number.</param>
-        /// <returns>Rounded number.</returns>
-        public static double RoundUpPoint5(double val) => Ceiling(val * 2) / 2;
+        /// <param name="num">Số cần làm tròn.</param>
+        /// <returns>Số đã được làm tròn.</returns>
+        public static double RoundUpPoint5(double num) => Ceiling(num * 2) / 2;
 
         /// <summary>
-        /// Round down span 0.5.
+        /// Làm tròn xuống 0.5.
         /// </summary>
-        /// <param name="val">Number.</param>
-        /// <returns>Rounded number.</returns>
-        public static double RoundDownPoint5(double val) => Floor(val * 2) / 2;
+        /// <param name="num">Số cần làm tròn.</param>
+        /// <returns>Số đã được làm tròn.</returns>
+        public static double RoundDownPoint5(double num) => Floor(num * 2) / 2;
 
         /// <summary>
-        /// Convert string to double.
+        /// Chuyển chuỗi sang số double.
         /// </summary>
-        /// <param name="num">Number text.</param>
-        /// <returns>Number double.</returns>
-        public static double DoubleParse(string num)
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Số kiểu double.</returns>
+        public static double ParseDouble(this string str)
         {
-            double.TryParse(num, out var val);
-            return val;
+            double.TryParse(str, out var num);
+            return num;
         }
 
         /// <summary>
-        /// Convert string to int.
+        /// Chuyển chuỗi sang số int.
         /// </summary>
-        /// <param name="num">Number text.</param>
-        /// <returns>Number int.</returns>
-        public static int IntParse(string num)
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Số kiểu int.</returns>
+        public static int ParseInt(this string str)
         {
-            int.TryParse(num, out var val);
-            return val;
+            int.TryParse(str, out var num);
+            return num;
         }
 
         /// <summary>
-        /// Find min value.
+        /// Tìm giá trị nhỏ nhất.
         /// </summary>
-        /// <param name="val">Current value.</param>
-        /// <param name="lim">Check value.</param>
-        public static void Miner(ref DateTime val, DateTime lim)
+        /// <param name="list">Chuỗi dữ liệu so sánh.</param>
+        /// <returns>Giá trị nhỏ nhất.</returns>
+        public static T Miner<T>(params T[] list)
         {
-            if (val > lim)
+            dynamic res = list[0];
+            foreach (var item in list)
             {
-                val = lim;
+                if (item < res)
+                {
+                    res = item;
+                }
             }
-        }
-        public static void Miner(ref int val, int lim)
-        {
-            if (val > lim)
-            {
-                val = lim;
-            }
+            return res;
         }
 
         /// <summary>
-        /// Find max value.
+        /// Tìm giá trị lớn nhất.
         /// </summary>
-        /// <param name="val">Current value.</param>
-        /// <param name="lim">Check value.</param>
-        public static void Maxer(ref DateTime val, DateTime lim)
+        /// <param name="list">Chuỗi dữ liệu so sánh.</param>
+        /// <returns>Giá trị lớn nhất.</returns>
+        public static T Maxer<T>(params T[] list)
         {
-            if (val < lim)
+            dynamic res = list[0];
+            foreach (var item in list)
             {
-                val = lim;
+                if (item > res)
+                {
+                    res = item;
+                }
             }
-        }
-        public static void Maxer(ref int val, int lim)
-        {
-            if (val < lim)
-            {
-                val = lim;
-            }
+            return res;
         }
         #endregion
 
         #region Internet
         /// <summary>
-        /// Check internet connection.
+        /// Kiểm tra kết nối internet.
         /// </summary>
-        /// <returns>Connected or failed.</returns>
-        public static bool CheckInternetConnect()
+        /// <returns>Kết nổi hoặc không.</returns>
+        public static bool CheckInternet()
         {
             try
             {
@@ -388,51 +438,51 @@ namespace YAN_Scripts
 
         #region Data
         /// <summary>
-        /// Convert value from database.
+        /// Chuyển dữ liệu từ database.
         /// </summary>
-        /// <typeparam name="T">Data type.</typeparam>
-        /// <param name="obj">Object value.</param>
-        /// <returns>Converted value.</returns>
+        /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
+        /// <param name="obj">Dữ liệu mục tiêu.</param>
+        /// <returns>Giá trị được chuyển.</returns>
         public static T ValFromDb<T>(object obj) => obj == null || obj == Value ? default : (T)obj;
 
         /// <summary>
-        /// Datatable search row index.
+        /// Tìm vị trí dòng trong datatable chứa ô có chuỗi cần tìm.
         /// </summary>
-        /// <param name="dt">Datatable source.</param>
-        /// <param name="dcName">Name of column</param>
-        /// <param name="searchText">Value to search.</param>
-        /// <returns>Index of row datatable.</returns>
-        public static int DtSearchRow(DataTable dt, string dcName, string searchText) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{searchText}'")[0]);
+        /// <param name="dt">Datatable tìm kiếm.</param>
+        /// <param name="dcName">Tên cột tìm kiếm.</param>
+        /// <param name="searchText">Chuỗi cần tìm.</param>
+        /// <returns>Vị trí dòng trong datatable.</returns>
+        public static int SearchRowIndexWithText(this DataTable dt, string dcName, string searchText) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{searchText}'")[0]);
 
         /// <summary>
-        /// Datatable numeric column sort.
+        /// Sort datatable theo cột số từ nhỏ đến lớn.
         /// </summary>
-        /// <param name="dt">Datatable source.</param>
-        /// <param name="dcName">Name of column</param>
-        /// <returns>Datatable sorted.</returns>
+        /// <param name="dt">Datatable sort.</param>
+        /// <param name="dcName">Tên cột sort.</param>
+        /// <returns>Datatable mới đã sort.</returns>
         public static DataTable DtSortNumCol(DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
 
         /// <summary>
-        /// Datatable add new row with default value.
+        /// Datatable thêm dòng mới.
         /// </summary>
-        /// <param name="dt">Datatable source.</param>
-        public static void DtAddRow(DataTable dt) => dt.Rows.Add(dt.NewRow());
+        /// <param name="dt">Datatable cần thêm dòng.</param>
+        public static void AddNewRow(this DataTable dt) => dt.Rows.Add(dt.NewRow());
 
         /// <summary>
-        /// Datatable add column at index.
+        /// Datatable thêm cột tại vị trí.
         /// </summary>
-        /// <typeparam name="T">Data type.</typeparam>
-        /// <param name="dt">Datatable source.</param>
-        /// <param name="dcName">Name of new column.</param>
-        /// <param name="index">Index of new column.</param>
-        public static void DtAddColAt<T>(DataTable dt, string dcName, int index) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(index);
+        /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
+        /// <param name="dt">Datatable cần thêm cột.</param>
+        /// <param name="dcName">Tên cột cần thêm.</param>
+        /// <param name="i">Vị trí cột cần thêm.</param>
+        public static void AddColAt<T>(this DataTable dt, string dcName, int i) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(i);
 
         /// <summary>
-        /// Datatable crop column.
+        /// Datatable cắt cột theo mẫu.
         /// </summary>
-        /// <param name="dtSrc">Datatable form.</param>
-        /// <param name="dt">Datatable current.</param>
-        public static void DtSyncCol(DataTable dtSrc, DataTable dt)
+        /// <param name="dt">Datatable cần đồng bộ.</param>
+        /// <param name="dtSrc">Datatable mẫu.</param>
+        public static void SyncCol(this DataTable dt, DataTable dtSrc)
         {
             while (dt.Columns.Count > dtSrc.Columns.Count)
             {
@@ -440,29 +490,29 @@ namespace YAN_Scripts
             }
             while (dt.Columns.Count < dtSrc.Columns.Count)
             {
-                DtAddColAt<string>(dt, dtSrc.Columns[dt.Columns.Count].ColumnName, dt.Columns.Count);
+                dt.AddColAt<string>(dtSrc.Columns[dt.Columns.Count].ColumnName, dt.Columns.Count);
             }
         }
 
         /// <summary>
-        /// Datatable transfer data.
+        /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
-        /// <param name="dtSrc">Datatable from.</param>
-        /// <param name="dt">Datatable to.</param>
-        public static void DtTransData(DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dt, OverwriteChanges);
+        /// <param name="dtSrc">Datatable cần chép.</param>
+        /// <param name="dt">Datatable nhận.</param>
+        public static void CopTo(this DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dt, OverwriteChanges);
 
         /// <summary>
-        /// Datatable transfer data and reverse row.
+        /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
         /// </summary>
-        /// <param name="dtSrc">Datatable from.</param>
-        /// <param name="dt">Datatable to.</param>
-        public static void DtTransReverseData(DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dt, OverwriteChanges);
+        /// <param name="dtSrc">Datatable cần chép.</param>
+        /// <param name="dt">Datatable nhận.</param>
+        public static void CopReverseTo(this DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dt, OverwriteChanges);
 
         /// <summary>
-        /// Copy datatable to clipboard.
+        /// Chép datatable lên clipboard.
         /// </summary>
-        /// <param name="dt">Datatable source.</param>
-        public static void Dt2Clipboard(DataTable dt)
+        /// <param name="dt">Datatable cần chép.</param>
+        public static void DtToClipboard(DataTable dt)
         {
             using (var frm = new Form
             {
@@ -484,28 +534,27 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Datatable merge all.
+        /// Gộp datatable.
         /// </summary>
-        /// <param name="dts">All datatables in array.</param>
-        /// <param name="dt">Datatable to.</param>
-        /// <param name="length">Length of array.</param>
-        public static void DtAll41(DataTable[] dts, DataTable dt, int length)
+        /// <param name="dt">Datatable gộp.</param>
+        /// <param name="dts">Chuỗi datatable.</param>
+        public static void DtMerge(DataTable dt, params DataTable[] dts)
         {
-            for (var i = 0; i < length; i++)
+            foreach (var item in dts)
             {
-                if (dts[i] != null)
+                if (item != null)
                 {
-                    DtTransData(dts[i], dt);
+                    item.CopTo(dt);
                 }
             }
         }
 
         /// <summary>
-        /// Convert datagridview to data table.
+        /// Chuyển datagridview sang datatable.
         /// </summary>
-        /// <param name="dgv">Datagridview.</param>
-        /// <returns>Datatable</returns>
-        public static DataTable Dgv2Dt(DataGridView dgv)
+        /// <param name="dgv">Datagridview cần chuyển.</param>
+        /// <returns>Datatable đã được chuyển.</returns>
+        public static DataTable ToDt(this DataGridView dgv)
         {
             var dt = new DataTable();
             foreach (DataGridViewColumn dgvc in dgv.Columns)
@@ -525,11 +574,11 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Double Buffered of datagridview.
+        /// Thay đổi trạng thái double buffered của datagridview.
         /// </summary>
-        /// <param name="dgv">DataGridView.</param>
-        /// <param name="state">State of setting.</param>
-        public static void DgvDubBuffered(DataGridView dgv, bool state)
+        /// <param name="dgv">Datagridview thay đổi.</param>
+        /// <param name="state">Trạng thái thay đổi.</param>
+        public static void DubBuffered(this DataGridView dgv, bool state)
         {
             if (!TerminalServerSession)
             {
@@ -538,17 +587,17 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Auto size mod datagridview.
+        /// Thay đổi trạng thái auto size của datagridview.
         /// </summary>
-        /// <param name="dgv">DataGridView.</param>
-        /// <param name="state">State of setting.</param>
-        public static void DgvAutoSizeMod(DataGridView dgv, bool state) => dgv.AutoSizeColumnsMode = state ? AllCells : DataGridViewAutoSizeColumnsMode.None;
+        /// <param name="dgv">Datagridview thay đổi.</param>
+        /// <param name="state">Trạng thái thay đổi.</param>
+        public static void AutoSizeMod(this DataGridView dgv, bool state) => dgv.AutoSizeColumnsMode = state ? AllCells : DataGridViewAutoSizeColumnsMode.None;
 
         /// <summary>
-        /// Reboot no. datagridview columns lock source data.
+        /// Tự động khởi tạo lại cột số thứ tự cho datagridview khóa dòng.
         /// </summary>
-        /// <param name="dgv">Datagridview.</param>
-        public static void DgvSrcDataRebootNo(DataGridView dgv)
+        /// <param name="dgv">Datagridview nguồn.</param>
+        public static void RebootNoLock(this DataGridView dgv)
         {
             foreach (DataGridViewRow dgvr in dgv.Rows)
             {
@@ -557,10 +606,10 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Reboot no. datagridview columns free data.
+        /// Tự động khởi tạo lại cột số thứ tự cho datagridview dòng tự do.
         /// </summary>
-        /// <param name="dgv">Datagridview.</param>
-        public static void DgvFreeDataRebootNo(DataGridView dgv)
+        /// <param name="dgv">Datagridview nguồn.</param>
+        public static void RebootNoFree(this DataGridView dgv)
         {
             for (var i = 0; i < dgv.RowCount - 1; i++)
             {
@@ -589,7 +638,7 @@ namespace YAN_Scripts
         public static bool CheckAppInstalled(string name)
         {
             var address = @"Microsoft\Windows\CurrentVersion\Uninstall";
-            return CheckAppList(name, $"SOFTWARE\\{address}") || CheckAppList(name, $"SOFTWARE\\Wow6432Node\\{address}");
+            return CheckAppInList(name, $"SOFTWARE\\{address}") || CheckAppInList(name, $"SOFTWARE\\Wow6432Node\\{address}");
         }
 
         /// <summary>
@@ -620,37 +669,6 @@ namespace YAN_Scripts
         /// <param name="text">Text value.</param>
         /// <returns>Text converted.</returns>
         public static string ToTitleCaseUpgrade(string text) => CurrentCulture.TextInfo.ToTitleCase(text);
-
-        /// <summary>
-        /// Number to Vietnamese words.
-        /// </summary>
-        /// <param name="num">Number translate.</param>
-        /// <returns>Translate text.</returns>
-        public static string ToVietnameseWords(this int num)
-        {
-            if (num == 0)
-            {
-                return "Không";
-            }
-            if (num < 0)
-            {
-                return "Âm " + (-num).ToVietnameseWords().ToLower();
-            }
-            var str = num.ToString();
-            var groups = (ZeroLeftPadding[str.Length % 3] + str).Chunked(3).ToArray();
-            var index = -1;
-            var rawResult = groups.Aggregate("", (acc, e) =>
-            {
-                checked
-                {
-                    index++;
-                }
-                var readTriple = ReadTriple(e, groups.ShouldShowZeroHundred() && index > 0);
-                var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - index) ?? "");
-                return $"{acc} {readTriple} {multipleThousand} ";
-            });
-            return Regex.Replace(rawResult, "\\s+", " ").Trim().Capitalize(); //replace white space with a specified character
-        }
         #endregion
 
         #region Process
@@ -704,7 +722,7 @@ namespace YAN_Scripts
                 }
                 catch
                 {
-                    ResetWinQuest();
+                    ResetVerify();
                 }
             }
         }
@@ -770,7 +788,7 @@ namespace YAN_Scripts
                 }
                 catch
                 {
-                    ResetWinQuest();
+                    ResetVerify();
                 }
             }
         }
