@@ -6,7 +6,6 @@ using YAN_Controls;
 using static AnimatorNS.AnimationType;
 using static System.Drawing.Color;
 using static YAN_Scripts.YANConstant;
-using static YAN_Scripts.YANMethod;
 
 namespace YAN_Scripts
 {
@@ -15,10 +14,10 @@ namespace YAN_Scripts
         #region Form Move
         //fields
         private static bool _moveFrm;
-        private static Point _lastLocation;
+        private static Point _lastLoc;
 
         /// <summary>
-        /// Focus the control used move form.
+        /// Focus control dùng để di chuyển form.
         /// </summary>
         public static void MoveFrm_MouseDown(object sender, MouseEventArgs e)
         {
@@ -26,25 +25,25 @@ namespace YAN_Scripts
             _sound_Change_.Play();
             //action
             _moveFrm = true;
-            _lastLocation = e.Location;
+            _lastLoc = e.Location;
             ((Control)sender).FindForm().Opacity = 0.7;
         }
 
         /// <summary>
-        /// Moving the control.
+        /// Di chuyển control.
         /// </summary>
         public static void MoveFrm_MouseMove(object sender, MouseEventArgs e)
         {
             if (_moveFrm)
             {
                 var frm = ((Control)sender).FindForm();
-                frm.Location = new Point(frm.Location.X - _lastLocation.X + e.X, frm.Location.Y - _lastLocation.Y + e.Y);
+                frm.Location = new Point(frm.Location.X - _lastLoc.X + e.X, frm.Location.Y - _lastLoc.Y + e.Y);
                 frm.Update();
             }
         }
 
         /// <summary>
-        /// Finish move.
+        /// Kết thúc di chyển.
         /// </summary>
         public static void MoveFrm_MouseUp(object sender, MouseEventArgs e)
         {
@@ -55,35 +54,35 @@ namespace YAN_Scripts
 
         #region Button Icon
         /// <summary>
-        /// Active effect when Click icon button.
+        /// Effect khi click button icon.
         /// </summary>
         public static void BtnIc_Click(object sender, EventArgs e)
         {
             var btn = (Button)sender;
             btn.Hide();
-            ShowAnimator(btn, Scale, _animatorSpeed_ * 2);
+            btn.ShowAsync(Scale, _animatorSpeed_ * 2);
         }
         #endregion
 
         #region Button Image
         /// <summary>
-        /// Effect when the image button hover.
+        /// Trạng thái nổi bật của button image khi hover.
         /// </summary>
         public static void BtnImg_MouseEnter(object sender, EventArgs e)
         {
             var btn = (YANButton)sender;
             btn.BorderSize = 1;
-            SetHighLightLbl(btn, "button", btn.BorderColor, true);
+            btn.HighLightLblLinkByName("button", btn.BorderColor, true);
         }
 
         /// <summary>
-        /// Restore default state for the image button.
+        /// Trả về trạng thái bình thường của button image khi leave.
         /// </summary>
         public static void BtnImg_MouseLeave(object sender, EventArgs e)
         {
             var btn = (YANButton)sender;
             btn.BorderSize = 0;
-            SetHighLightLbl(btn, "button", btn.ForeColor, true);
+            btn.HighLightLblLinkByName("button", btn.ForeColor, true);
         }
         #endregion
 
@@ -134,15 +133,6 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Orange icon style fill.
-        /// </summary>
-        public static void BtnR235G107B60F_EnabledChanged(object sender, EventArgs e)
-        {
-            var btn = (YANButton)sender;
-            btn.BackColor = btn.Enabled ? FromArgb(235, 107, 60) : Gray;
-        }
-
-        /// <summary>
         /// Blue style fill.
         /// </summary>
         public static void BtnR10G124B235F_EnabledChanged(object sender, EventArgs e)
@@ -152,12 +142,30 @@ namespace YAN_Scripts
         }
 
         /// <summary>
+        /// Orange icon style fill.
+        /// </summary>
+        public static void BtnR235G107B60F_EnabledChanged(object sender, EventArgs e)
+        {
+            var btn = (YANButton)sender;
+            btn.BackColor = btn.Enabled ? FromArgb(235, 107, 60) : Gray;
+        }
+
+        /// <summary>
         /// Blue icon style fill.
         /// </summary>
         public static void BtnR45G85B205F_EnabledChanged(object sender, EventArgs e)
         {
             var btn = (YANButton)sender;
             btn.BackColor = btn.Enabled ? FromArgb(45, 85, 205) : Gray;
+        }
+
+        /// <summary>
+        /// Green icon style fill.
+        /// </summary>
+        public static void BtnR40G159B93F_EnabledChanged(object sender, EventArgs e)
+        {
+            var btn = (YANButton)sender;
+            btn.BackColor = btn.Enabled ? FromArgb(40, 159, 93) : Gray;
         }
 
         /// <summary>
@@ -177,15 +185,6 @@ namespace YAN_Scripts
             var btn = (YANButton)sender;
             btn.BorderColor = btn.Enabled ? HotPink : Gray;
         }
-
-        /// <summary>
-        /// Green icon style fill.
-        /// </summary>
-        public static void BtnR40G159B93F_EnabledChanged(object sender, EventArgs e)
-        {
-            var btn = (YANButton)sender;
-            btn.BackColor = btn.Enabled ? FromArgb(40, 159, 93) : Gray;
-        }
         #endregion
 
         #region ComboBox Enable Changed Color
@@ -195,16 +194,8 @@ namespace YAN_Scripts
         public static void CmbR38G126B86F_EnabledChanged(object sender, EventArgs e)
         {
             var cmb = (YANComboBox)sender;
-            if (cmb.Enabled)
-            {
-                cmb.BackColor = FromArgb(38, 126, 86);
-                cmb.IconColor = White;
-            }
-            else
-            {
-                cmb.BackColor = Gray;
-                cmb.IconColor = Gray;
-            }
+            cmb.BackColor = cmb.Enabled ? FromArgb(38, 126, 86) : Gray;
+            cmb.IconColor = cmb.Enabled ? White : Gray;
         }
 
         /// <summary>
@@ -213,16 +204,8 @@ namespace YAN_Scripts
         public static void CmbMediumPurpleB_EnabledChanged(object sender, EventArgs e)
         {
             var cmb = (YANComboBox)sender;
-            if (cmb.Enabled)
-            {
-                cmb.BorderColor = MediumPurple;
-                cmb.IconColor = Cyan;
-            }
-            else
-            {
-                cmb.BorderColor = Gray;
-                cmb.IconColor = Gray;
-            }
+            cmb.BorderColor = cmb.Enabled ? MediumPurple : Gray;
+            cmb.IconColor = cmb.Enabled ? Cyan : Gray;
         }
         #endregion
 
@@ -233,7 +216,7 @@ namespace YAN_Scripts
         public static void DpR68G114B196F_EnabledChanged(object sender, EventArgs e)
         {
             var dp = (YANDatePicker)sender;
-            dp.TextColor = ClInvert(dp.TextColor);
+            dp.TextColor = dp.TextColor.Invert();
             dp.SkinColor = dp.Enabled ? FromArgb(68, 114, 196) : Gray;
         }
 
@@ -247,12 +230,12 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// White style border.
+        /// Pink style border.
         /// </summary>
         public static void DpPaleVioletRedB_EnabledChanged(object sender, EventArgs e)
         {
             var dp = (YANDatePicker)sender;
-            dp.TextColor = ClInvert(dp.TextColor);
+            dp.TextColor = dp.TextColor.Invert();
             dp.BorderColor = dp.Enabled ? PaleVioletRed : Gray;
         }
         #endregion
@@ -297,7 +280,7 @@ namespace YAN_Scripts
 
         #region RadioButton Enable Changed Color
         /// <summary>
-        /// Blue style border.
+        /// Pink style border.
         /// </summary>
         public static void RdoHotPink_EnabledChanged(object sender, EventArgs e)
         {
@@ -337,48 +320,36 @@ namespace YAN_Scripts
 
         #region TextBox Focus
         /// <summary>
-        /// Capitalize each word.
+        /// Textbox auto viết hoa mỗi chữ đầu trong chuỗi.
         /// </summary>
-        public static void TxtCEW_Leave(object sender, EventArgs e)
+        public static void TxtCapitalizeEachWord_Leave(object sender, EventArgs e)
         {
             var txt = (YANTextBox)sender;
-            var t_txt = txt.Txt;
-            if (!string.IsNullOrWhiteSpace(t_txt))
-            {
-                txt.Txt = ToTitleCaseUpgrade(t_txt);
-            }
+            txt.Txt = txt.Txt.CapitalizeEachWordAdv();
         }
 
         /// <summary>
-        /// Upcase.
+        /// Textbox auto viết hoa cả chuỗi.
         /// </summary>
-        public static void TxtUC_Leave(object sender, EventArgs e)
+        public static void TxtUpCase_Leave(object sender, EventArgs e)
         {
             var txt = (YANTextBox)sender;
-            var t_txt = txt.Txt;
-            if (!string.IsNullOrWhiteSpace(t_txt))
-            {
-                txt.Txt = t_txt.ToUpper();
-            }
+            txt.Txt = txt.Txt.UpperAdv();
         }
 
         /// <summary>
-        /// Lowcase.
+        /// Textbox auto viết thường cả chuỗi.
         /// </summary>
-        public static void TxtLC_Leave(object sender, EventArgs e)
+        public static void TxtLowCase_Leave(object sender, EventArgs e)
         {
             var txt = (YANTextBox)sender;
-            var t_txt = txt.Txt;
-            if (!string.IsNullOrWhiteSpace(t_txt))
-            {
-                txt.Txt = t_txt.ToLower();
-            }
+            txt.Txt = txt.Txt.LowerAdv();
         }
         #endregion
 
         #region TextBox Input
         /// <summary>
-        /// Allow only number key.
+        /// Textbox chỉ nhập được số.
         /// </summary>
         public static void TxtNumeric_Keypress(object sender, KeyPressEventArgs e)
         {
@@ -389,9 +360,9 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Denied space.
+        /// Textbox không có khoảng trắng.
         /// </summary>
-        public static void TxtContinuous_KeyPress(object sender, KeyPressEventArgs e)
+        public static void TxtContinuity_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (char.IsWhiteSpace(e.KeyChar))
             {
@@ -402,27 +373,27 @@ namespace YAN_Scripts
 
         #region RadioButton Link
         /// <summary>
-        /// Change state combobox linked radiobutton check.
+        /// Link trạng thái từ radiobutton sang combobox.
         /// </summary>
-        public static void Rdo2Cmb_CheckedChanged(object sender, EventArgs e)
+        public static void RdoLinkCmb_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = (YANRadioButton)sender;
             ((YANComboBox)rdo.FindForm().Controls.Find($"comboBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault()).Enabled = rdo.Checked;
         }
 
         /// <summary>
-        /// Change state groupbox linked radiobutton check.
+        /// Link trạng thái từ radiobutton sang groupbox.
         /// </summary>
-        public static void Rdo2Grp_CheckedChanged(object sender, EventArgs e)
+        public static void RdoLinkGrp_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = (YANRadioButton)sender;
             ((GroupBox)rdo.FindForm().Controls.Find($"groupBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault()).Enabled = rdo.Checked;
         }
 
         /// <summary>
-        /// Change state textbox linked radiobutton check.
+        /// Link trạng thái từ radiobutton sang textbox.
         /// </summary>
-        public static void Rdo2Txt_CheckedChanged(object sender, EventArgs e)
+        public static void RdoLinkTxt_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = (YANRadioButton)sender;
             ((YANTextBox)rdo.FindForm().Controls.Find($"textBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault()).Enabled = rdo.Checked;
@@ -431,18 +402,18 @@ namespace YAN_Scripts
 
         #region ToggleButton Link
         /// <summary>
-        /// Change state label and datepicker linked togglebutton check.
+        /// Link trạng thái từ togglebutton sang datepicker.
         /// </summary>
-        public static void Tgbtn2Dp_CheckedChanged(object sender, EventArgs e)
+        public static void TgbtnLinkDp_CheckedChanged(object sender, EventArgs e)
         {
             var tgbtn = (YANToggleButton)sender;
             ((YANDatePicker)tgbtn.FindForm().Controls.Find($"datePicker{tgbtn.Name.Substring("toggleButton".Length)}", true).FirstOrDefault()).Enabled = tgbtn.Checked;
         }
 
         /// <summary>
-        /// Change state combobox linked togglebutton check.
+        /// Link trạng thái từ togglebutton sang combobox.
         /// </summary>
-        public static void Tgbtn2Cmb_CheckedChanged(object sender, EventArgs e)
+        public static void TgbtnLinkCmb_CheckedChanged(object sender, EventArgs e)
         {
             var tgbtn = (YANToggleButton)sender;
             ((YANComboBox)tgbtn.FindForm().Controls.Find($"comboBox{tgbtn.Name.Substring("toggleButton".Length)}", true).FirstOrDefault()).Enabled = tgbtn.Checked;

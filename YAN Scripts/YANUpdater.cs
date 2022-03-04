@@ -26,7 +26,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Turn on updater form.
+        /// Bật form updater.
         /// </summary>
         public void OnLoader()
         {
@@ -35,7 +35,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Turn off updater form.
+        /// Tắt form updater.
         /// </summary>
         public void OffLoader()
         {

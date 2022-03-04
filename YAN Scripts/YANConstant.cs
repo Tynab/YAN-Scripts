@@ -8,20 +8,19 @@ namespace YAN_Scripts
     public class YANConstant
     {
         #region Variable
-        public static Font _fntTitVie_ = new Font("Tahoma", 10);
-        public static Font _fntTitJap_ = new Font("Yu Gothic", 11);
-        public static Font _fntTextVie_ = new Font("Segoe UI Light", 10);
-        public static Font _fntTextJap_ = new Font("Meiryo", 10);
-        public static Font _fntCapVie_ = new Font("Verdana", 9);
-        public static readonly Color _clTitXl_ = FromArgb(0, 122, 204);
-        public const string _trueVie_ = "Có";
-        public const string _falseVie_ = "Không";
+        public static Font _fntTitVn_ = new Font("Tahoma", 10);
+        public static Font _fntTitJp_ = new Font("Yu Gothic", 11);
+        public static Font _fntCapVn_ = new Font("Verdana", 9);
+        public static Font _fntCapJp_ = new Font("Meiryo", 11);
+        public static Font _fntTextVn_ = new Font("Segoe UI Light", 10);
+        public static Font _fntTextJp_ = new Font("Meiryo", 10);
+        public static readonly Color _clHeaderXl_ = FromArgb(0, 122, 204);
+        public const string _trueVn_ = "Có";
+        public const string _falseVn_ = "Không";
         public const string _prcXl_ = "excel";
         public const string _nameCo_ = "Nephilim";
         public const string _numFormat_ = "N0";
-        public const string _dateFormatName_ = "dd-MM-yyyy";
-        public const string _dateFormatPara_ = "dd.MM.yyyy";
-        public const string _timezoneVN_ = "07:00:00";
+        public const string _timezoneVn_ = "07:00:00";
         public const string _xlFormatText_ = "@";
         public const string _xlFormatNum_ = "#,##0";
         public const string _codeFormatText = "Unicode Text";
@@ -41,7 +40,7 @@ namespace YAN_Scripts
         #endregion
 
         #region Type
-        public enum AlarmAction
+        public enum CountdownAction
         {
             ShutDown,
             Restart

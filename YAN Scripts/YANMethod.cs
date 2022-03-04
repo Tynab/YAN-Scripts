@@ -53,7 +53,7 @@ using static System.Windows.Forms.SystemInformation;
 using static YAN_Message_Box.ELang;
 using static YAN_Message_Box.YANMessageBox;
 using static YAN_Scripts.YANConstant;
-using static YAN_Scripts.YANConstant.AlarmAction;
+using static YAN_Scripts.YANConstant.CountdownAction;
 using Timer = System.Windows.Forms.Timer;
 
 namespace YAN_Scripts
@@ -64,14 +64,14 @@ namespace YAN_Scripts
         //xac nhận reset máy
         private static void ResetVerify()
         {
-            if (MsgboxQuestAdvancedVN("HỎI", "Lỗi ứng dụng chạy ngầm, khởi động lại hệ thống để khắc phục?") == Yes)
+            if (MsgboxQuestionAdvVn("HỎI", "Lỗi ứng dụng chạy ngầm, khởi động lại hệ thống để khắc phục?") == Yes)
             {
-                AlarmWin(Restart, 3);
+                CountdownWin(Restart, 3);
             }
         }
 
         //căt ảnh
-        private static Image CropImg(Image img, Rectangle rect) => ((Bitmap)img).Clone(rect, img.PixelFormat);
+        private static Image Crop(this Image img, Rectangle rect) => ((Bitmap)img).Clone(rect, img.PixelFormat);
 
         //hoán đổi
         private static uint SwapEndianness(ulong x) => (uint)(((x & 0x000000ff) << 24) + ((x & 0x0000ff00) << 8) + ((x & 0x00ff0000) >> 8) + ((x & 0xff000000) >> 24));
@@ -107,10 +107,10 @@ namespace YAN_Scripts
         }
 
         //check app installer trong app list
-        private static bool CheckAppInList(string name, string address)
+        private static bool CheckAppInList(string name, string path)
         {
             var check = false;
-            var key = LocalMachine.OpenSubKey(address);
+            var key = LocalMachine.OpenSubKey(path);
             if (key != null)
             {
                 ForEach(key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)), (subkey, state) =>
@@ -128,11 +128,35 @@ namespace YAN_Scripts
         }
         #endregion
 
+        #region Console
+        //fields
+        private const byte SW_HIDE = 0;
+        private const byte SW_SHOW = 5;
+
+        //get window
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetConsoleWindow();
+
+        //hiện window
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        /// <summary>
+        /// Ẩn window console.
+        /// </summary>
+        public static void HideConsole() => ShowWindow(GetConsoleWindow(), SW_HIDE);
+
+        /// <summary>
+        /// Hiện window console.
+        /// </summary>
+        public static void ShowConsole() => ShowWindow(GetConsoleWindow(), SW_SHOW);
+        #endregion
+
         #region Vietnamese Format
         //fân khuc
-        private static IEnumerable<string> Chunked(this string text, int chunkSize) => Range(0, text.Length / chunkSize).Select(i => text.Substring(i * chunkSize, chunkSize));
+        private static IEnumerable<string> Chunked(this string str, int chunkSize) => Range(0, str.Length / chunkSize).Select(i => str.Substring(i * chunkSize, chunkSize));
 
-        //không trăm
+        //fần ngìn
         private static bool ShouldShowZeroHundred(this string[] groups) => groups.Reverse().TakeWhile(it => it == "000").Count() < groups.Count() - 1;
 
         //zải cấu truc (private của function number to vietnamese words)
@@ -180,17 +204,6 @@ namespace YAN_Scripts
             };
         }
 
-        //viêt hoa
-        private static string Capitalize(this string input)
-        {
-            return input switch
-            {
-                null => throw new ArgumentNullException(nameof(input)),
-                "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
-                _ => input.First().ToString().ToUpper() + input.Substring(1).ToLower()
-            };
-        }
-
         /// <summary>
         /// Chuyển số sang chữ Việt.
         /// </summary>
@@ -208,18 +221,18 @@ namespace YAN_Scripts
             }
             var str = num.ToString();
             var groups = (ZeroLeftPadding[str.Length % 3] + str).Chunked(3).ToArray();
-            var index = -1;
+            var i = -1;
             var rawResult = groups.Aggregate("", (acc, e) =>
             {
                 checked
                 {
-                    index++;
+                    i++;
                 }
-                var readTriple = ReadTriple(e, groups.ShouldShowZeroHundred() && index > 0);
-                var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - index) ?? "");
+                var readTriple = ReadTriple(e, groups.ShouldShowZeroHundred() && i > 0);
+                var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - i) ?? "");
                 return $"{acc} {readTriple} {multipleThousand} ";
             });
-            return Regex.Replace(rawResult, "\\s+", " ").Trim().Capitalize(); //replace white space with a specified character
+            return Regex.Replace(rawResult, "\\s+", " ").Trim().CapitalizeAdvEx(); //replace white space with a specified character
         }
 
         /// <summary>
@@ -271,9 +284,9 @@ namespace YAN_Scripts
         /// Chuyển chuỗi sang ngày giờ mở rộng.
         /// </summary>
         /// <param name="str">Chuỗi cần chuyển.</param>
-        /// <param name="dtmFormat">Định dạng ngày của chuỗi.</param>
+        /// <param name="format">Định dạng ngày của chuỗi.</param>
         /// <returns>Thành công hoặc thất bại.</returns>
-        public static bool TryParseExactEx(this string str, string dtmFormat, out DateTime dtm) => TryParseExact(str, dtmFormat, InvariantCulture, DateTimeStyles.None, out dtm);
+        public static bool TryParseExactEx(this string str, string format, out DateTime dtm) => TryParseExact(str, format, InvariantCulture, DateTimeStyles.None, out dtm);
 
         /// <summary>
         /// Chuyển chuỗi giờ phút sang giờ.
@@ -281,14 +294,14 @@ namespace YAN_Scripts
         /// <param name="hhmm">Chuỗi cần chuyển.</param>
         /// <param name="dtm">Giờ kết quả</param>
         /// <returns>Thành công hoặc thất bại.</returns>
-        public static bool TryParseFromHhmm(this string hhmm, out DateTime dtm) => hhmm.TryParseExactEx("HH:mm", out dtm) || hhmm.TryParseExactEx("h:mm", out dtm) || hhmm.TryParseExactEx("HH:m", out dtm) || hhmm.TryParseExactEx("h:m", out dtm);
+        public static bool TryParseFromHhmm(this string hhmm, out DateTime dtm) => TryParseExactEx(hhmm, "HH:mm", out dtm) || TryParseExactEx(hhmm, "h:mm", out dtm) || TryParseExactEx(hhmm, "HH:m", out dtm) || TryParseExactEx(hhmm, "h:m", out dtm);
 
         /// <summary>
         /// Chuyển chuỗi giờ phút sang số giờ.
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
-        public static double ParseFromHhmm(this string hm) => hm.TryParseFromHhmm(out var dtm) ? (dtm - Today).TotalHours : 0;
+        public static double ParseFromHhmm(this string hm) => TryParseFromHhmm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
         /// Chuyển số phút sang chuỗi giờ phút.
@@ -322,7 +335,7 @@ namespace YAN_Scripts
                     }
                     catch (Exception ex)
                     {
-                        MsgboxErrorAdvanced("ERROR", ex.ToString());
+                        MsgboxErrorAdv("ERROR", ex.ToString());
                     }
                 }
             }
@@ -332,10 +345,10 @@ namespace YAN_Scripts
         /// <summary>
         /// Tính số tháng giữa 2 ngày.
         /// </summary>
-        /// <param name="dtmFront">Ngày trước.</param>
-        /// <param name="dtmBack">Ngày sau.</param>
+        /// <param name="dtmSt">Ngày thứ nhất.</param>
+        /// <param name="dtmNd">Ngày thứ 2.</param>
         /// <returns>Số tháng được tính.</returns>
-        public static int DtmTotalMonth(DateTime dtmFront, DateTime dtmBack) => (dtmBack.Year - dtmFront.Year) * 12 + dtmBack.Month - dtmFront.Month;
+        public static int DtmTotalMonth(DateTime dtmSt, DateTime dtmNd) => dtmNd > dtmSt ? (dtmNd.Year - dtmSt.Year) * 12 + dtmNd.Month - dtmSt.Month : (dtmSt.Year - dtmNd.Year) * 12 + dtmSt.Month - dtmNd.Month;
         #endregion
 
         #region Math
@@ -344,14 +357,14 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="num">Số cần làm tròn.</param>
         /// <returns>Số đã được làm tròn.</returns>
-        public static double RoundUpPoint5(double num) => Ceiling(num * 2) / 2;
+        public static double RoundUpHalf(this double num) => Ceiling(num * 2) / 2;
 
         /// <summary>
         /// Làm tròn xuống 0.5.
         /// </summary>
         /// <param name="num">Số cần làm tròn.</param>
         /// <returns>Số đã được làm tròn.</returns>
-        public static double RoundDownPoint5(double num) => Floor(num * 2) / 2;
+        public static double RoundDownHalf(this double num) => Floor(num * 2) / 2;
 
         /// <summary>
         /// Chuyển chuỗi sang số double.
@@ -443,16 +456,16 @@ namespace YAN_Scripts
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
         /// <param name="obj">Dữ liệu mục tiêu.</param>
         /// <returns>Giá trị được chuyển.</returns>
-        public static T ValFromDb<T>(object obj) => obj == null || obj == Value ? default : (T)obj;
+        public static T ToVal<T>(this object obj) => obj == null || obj == Value ? default : (T)obj;
 
         /// <summary>
         /// Tìm vị trí dòng trong datatable chứa ô có chuỗi cần tìm.
         /// </summary>
         /// <param name="dt">Datatable tìm kiếm.</param>
         /// <param name="dcName">Tên cột tìm kiếm.</param>
-        /// <param name="searchText">Chuỗi cần tìm.</param>
+        /// <param name="str">Chuỗi cần tìm.</param>
         /// <returns>Vị trí dòng trong datatable.</returns>
-        public static int SearchRowIndexWithText(this DataTable dt, string dcName, string searchText) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{searchText}'")[0]);
+        public static int SearchRowIndexWithText(this DataTable dt, string dcName, string str) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{str}'")[0]);
 
         /// <summary>
         /// Sort datatable theo cột số từ nhỏ đến lớn.
@@ -460,7 +473,7 @@ namespace YAN_Scripts
         /// <param name="dt">Datatable sort.</param>
         /// <param name="dcName">Tên cột sort.</param>
         /// <returns>Datatable mới đã sort.</returns>
-        public static DataTable DtSortNumCol(DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
+        public static DataTable SortByNumCol(this DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
 
         /// <summary>
         /// Datatable thêm dòng mới.
@@ -480,17 +493,17 @@ namespace YAN_Scripts
         /// <summary>
         /// Datatable cắt cột theo mẫu.
         /// </summary>
-        /// <param name="dt">Datatable cần đồng bộ.</param>
+        /// <param name="dtDest">Datatable cần đồng bộ.</param>
         /// <param name="dtSrc">Datatable mẫu.</param>
-        public static void SyncCol(this DataTable dt, DataTable dtSrc)
+        public static void SyncColTo(this DataTable dtDest, DataTable dtSrc)
         {
-            while (dt.Columns.Count > dtSrc.Columns.Count)
+            while (dtDest.Columns.Count > dtSrc.Columns.Count)
             {
-                dt.Columns.RemoveAt(dt.Columns.Count - 1);
+                dtDest.Columns.RemoveAt(dtDest.Columns.Count - 1);
             }
-            while (dt.Columns.Count < dtSrc.Columns.Count)
+            while (dtDest.Columns.Count < dtSrc.Columns.Count)
             {
-                dt.AddColAt<string>(dtSrc.Columns[dt.Columns.Count].ColumnName, dt.Columns.Count);
+                dtDest.AddColAt<string>(dtSrc.Columns[dtDest.Columns.Count].ColumnName, dtDest.Columns.Count);
             }
         }
 
@@ -498,21 +511,21 @@ namespace YAN_Scripts
         /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
         /// <param name="dtSrc">Datatable cần chép.</param>
-        /// <param name="dt">Datatable nhận.</param>
-        public static void CopTo(this DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dt, OverwriteChanges);
+        /// <param name="dtDest">Datatable nhận.</param>
+        public static void CopTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
 
         /// <summary>
         /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
         /// </summary>
         /// <param name="dtSrc">Datatable cần chép.</param>
-        /// <param name="dt">Datatable nhận.</param>
-        public static void CopReverseTo(this DataTable dtSrc, DataTable dt) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dt, OverwriteChanges);
+        /// <param name="dtDest">Datatable nhận.</param>
+        public static void CopReverseTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDest, OverwriteChanges);
 
         /// <summary>
         /// Chép datatable lên clipboard.
         /// </summary>
         /// <param name="dt">Datatable cần chép.</param>
-        public static void DtToClipboard(DataTable dt)
+        public static void ToClipboard(this DataTable dt)
         {
             using (var frm = new Form
             {
@@ -536,15 +549,15 @@ namespace YAN_Scripts
         /// <summary>
         /// Gộp datatable.
         /// </summary>
-        /// <param name="dt">Datatable gộp.</param>
-        /// <param name="dts">Chuỗi datatable.</param>
-        public static void DtMerge(DataTable dt, params DataTable[] dts)
+        /// <param name="dtDest">Datatable gộp.</param>
+        /// <param name="dtsSrc">Chuỗi datatable.</param>
+        public static void MergeEx(this DataTable dtDest, params DataTable[] dtsSrc)
         {
-            foreach (var item in dts)
+            foreach (var item in dtsSrc)
             {
                 if (item != null)
                 {
-                    item.CopTo(dt);
+                    item.CopTo(dtDest);
                 }
             }
         }
@@ -597,7 +610,7 @@ namespace YAN_Scripts
         /// Tự động khởi tạo lại cột số thứ tự cho datagridview khóa dòng.
         /// </summary>
         /// <param name="dgv">Datagridview nguồn.</param>
-        public static void RebootNoLock(this DataGridView dgv)
+        public static void AutoNoColLock(this DataGridView dgv)
         {
             foreach (DataGridViewRow dgvr in dgv.Rows)
             {
@@ -609,7 +622,7 @@ namespace YAN_Scripts
         /// Tự động khởi tạo lại cột số thứ tự cho datagridview dòng tự do.
         /// </summary>
         /// <param name="dgv">Datagridview nguồn.</param>
-        public static void RebootNoFree(this DataGridView dgv)
+        public static void AutoNoColFree(this DataGridView dgv)
         {
             for (var i = 0; i < dgv.RowCount - 1; i++)
             {
@@ -620,63 +633,91 @@ namespace YAN_Scripts
 
         #region Window
         /// <summary>
-        /// Timer window action.
+        /// Đồng hồ hẹn giờ cho windows.
         /// </summary>
-        /// <param name="act">Action on window.</param>
-        /// /// <param name="sec">Second of countdown.</param>
-        public static void AlarmWin(AlarmAction act, int sec)
+        /// <param name="act">Hành động áp dụng.</param>
+        /// /// <param name="ss">Số giây đếm ngược.</param>
+        public static void CountdownWin(CountdownAction act, int ss)
         {
             var cmt = act == ShutDown ? "s" : "r";
-            Start("shutdown.exe", $"-{cmt} -t {sec}");
+            Start("shutdown.exe", $"-{cmt} -t {ss}");
         }
 
         /// <summary>
-        /// Check application installed by name.
+        /// Kiểm tra app đã cài đặt bằng tên.
         /// </summary>
-        /// <param name="name">Name of the application checking.</param>
-        /// <returns>Installed or not.</returns>
+        /// <param name="name">Tên app cần tìm.</param>
+        /// <returns>Đã cài hoặc chưa,</returns>
         public static bool CheckAppInstalled(string name)
         {
-            var address = @"Microsoft\Windows\CurrentVersion\Uninstall";
-            return CheckAppInList(name, $"SOFTWARE\\{address}") || CheckAppInList(name, $"SOFTWARE\\Wow6432Node\\{address}");
+            var path = @"Microsoft\Windows\CurrentVersion\Uninstall";
+            return CheckAppInList(name, $"SOFTWARE\\{path}") || CheckAppInList(name, $"SOFTWARE\\Wow6432Node\\{path}");
         }
 
         /// <summary>
-        /// Change color by value.
+        /// Tăng giảm hệ màu theo vector giá trị.
         /// </summary>
-        /// <param name="cl">Current color.</param>
-        /// <param name="val">Value.</param>
-        /// <returns>New color.</returns>
-        public static Color ClUpDown(Color cl, int val) => FromArgb((cl.R + val) % 256, (cl.G + val) % 256, (cl.B + val) % 256);
+        /// <param name="cl">Màu gốc.</param>
+        /// <param name="val">Giá trị thêm.</param>
+        /// <returns>Màu mới.</returns>
+        public static Color UpDown(this Color cl, int val) => FromArgb((cl.R + val) % 256, (cl.G + val) % 256, (cl.B + val) % 256);
 
         /// <summary>
-        /// Invert color.
+        /// Đảo nghịch màu.
         /// </summary>
-        /// <param name="cl">The color.</param>
-        /// <returns>New color.</returns>
-        public static Color ClInvert(Color cl) => FromArgb(cl.ToArgb() ^ 0xffffff);
+        /// <param name="cl">Màu gốc.</param>
+        /// <returns>Màu mới.</returns>
+        public static Color Invert(this Color cl) => FromArgb(cl.ToArgb() ^ 0xffffff);
 
         /// <summary>
-        /// Capitalize each word.
+        /// Viết thường cả chuỗi.
         /// </summary>
-        /// <param name="text">Text value.</param>
-        /// <returns>Text converted.</returns>
-        public static string CapitalizeEachWord(string text) => CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Chuỗi đã được chuyển.</returns>
+        public static string LowerAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? str.ToLower() : str;
 
         /// <summary>
-        /// Title case converter.
+        /// Viết hoa cả chuỗi.
         /// </summary>
-        /// <param name="text">Text value.</param>
-        /// <returns>Text converted.</returns>
-        public static string ToTitleCaseUpgrade(string text) => CurrentCulture.TextInfo.ToTitleCase(text);
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Chuỗi đã được chuyển.</returns>
+        public static string UpperAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? str.ToUpper() : str;
+
+        /// <summary>
+        /// Viết hoa chữ đầu chuỗi.
+        /// </summary>
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Chuỗi đã được chuyển.</returns>
+        public static string CapitalizeAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? str.First().ToString().ToUpper() + str.Substring(1) : str;
+
+        /// <summary>
+        /// Viết hoa chữ đầu chuỗi còn lại viết thường.
+        /// </summary>
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Chuỗi đã được chuyển.</returns>
+        public static string CapitalizeAdvEx(this string str) => !string.IsNullOrWhiteSpace(str) ? str.First().ToString().ToUpper() + str.Substring(1).ToLower() : str;
+
+        /// <summary>
+        /// Viết hoa mỗi chữ đầu trong chuỗi.
+        /// </summary>
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Chuỗi đã được chuyển.</returns>
+        public static string CapitalizeEachWordAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? CurrentCulture.TextInfo.ToTitleCase(str) : str;
+
+        /// <summary>
+        /// Viết hoa mỗi chữ đầu trong chuỗi còn lại viết thường.
+        /// </summary>
+        /// <param name="str">Chuỗi cần chuyển.</param>
+        /// <returns>Chuỗi đã được chuyển.</returns>
+        public static string CapitalizeEachWordAdvEx(this string str) => !string.IsNullOrWhiteSpace(str) ? CurrentCulture.TextInfo.ToTitleCase(str.ToLower()) : str;
         #endregion
 
         #region Process
         /// <summary>
-        /// Kill process.
+        /// Tắt tất cả process theo tên.
         /// </summary>
-        /// <param name="name">Name of the application.</param>
-        public static void KillPrc(string name)
+        /// <param name="name">Tên app cần tắt.</param>
+        public static void KillPrc(this string name)
         {
             if (GetProcessesByName(name).Count() > 0)
             {
@@ -685,34 +726,34 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Set label text another thread.
+        /// Invoke text tới label khác thread.
         /// </summary>
-        /// <param name="lbl">Label other thread.</param>
-        /// <param name="text">Text set.</param>
-        public static void InvokeLblText(Label lbl, string text) => lbl.Invoke((MethodInvoker)(() => lbl.Text = text));
+        /// <param name="lbl">Label cần invoke.</param>
+        /// <param name="text">Text cần invoke.</param>
+        public static void InvokeText(this Label lbl, string text) => lbl.Invoke((MethodInvoker)(() => lbl.Text = text));
 
         /// <summary>
-        /// Set panel width another thread.
+        /// Invoke độ rộng tới panel khác thread.
         /// </summary>
-        /// <param name="pnl">Panel other thread.</param>
-        /// <param name="wPnl">Width of panel.</param>
-        public static void InvokeWPnl(Panel pnl, int wPnl) => pnl.Invoke((MethodInvoker)(() => pnl.Width = wPnl));
+        /// <param name="pnl">Panel cần invoke.</param>
+        /// <param name="w">Độ rộng cần invoke.</param>
+        public static void InvokeW(this Panel pnl, int w) => pnl.Invoke((MethodInvoker)(() => pnl.Width = w));
         #endregion
 
         #region File
         /// <summary>
-        /// Get all file info in folder.
+        /// Get tất cả file trong folder.
         /// </summary>
         /// <param name="path">Folder path.</param>
-        /// <param name="searchText">Searching text.</param>
+        /// <param name="detail">Đuôi của file cần lọc.</param>
         /// <returns></returns>
-        public static FileInfo[] GetAllFileInFolder(string path, string searchText) => new DirectoryInfo(path).GetFiles(searchText).OrderBy(f => f.Name).ToArray();
+        public static FileInfo[] GetAllFileInFolder(string path, string detail) => new DirectoryInfo(path).GetFiles(detail).OrderBy(f => f.Name).ToArray();
 
         /// <summary>
-        /// Delete the file, if the file deleting is open reboot program.
+        /// Xóa file nâng cấp.
         /// </summary>
-        /// <param name="ad">Address of the file.</param>
-        public static void DelFileAdvanced(string ad)
+        /// <param name="ad">File address.</param>
+        public static void DelFileAdv(string ad)
         {
             if (File.Exists(ad))
             {
@@ -728,11 +769,11 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// If the file not exists write byte array to the file.
+        /// Ghi file bằng mảng byte nâng cấp.
         /// </summary>
-        /// <param name="ad">Address of the file.</param>
-        /// <param name="bytes">Byte array.</param>
-        public static void FileWriteBytesAdvanced(string ad, byte[] bytes)
+        /// <param name="ad">File address.</param>
+        /// <param name="bytes">Mảng byte.</param>
+        public static void FileWriteBytesAdv(string ad, byte[] bytes)
         {
             if (!File.Exists(ad))
             {
@@ -741,21 +782,19 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Capture current screen and save to jpeg file.
+        /// lưu trữ ảnh chụp màn hình.
         /// </summary>
-        /// <param name="path">Path of folder of jpeg file.</param>
-        /// <param name="name">Name of jpeg file.</param>
-        /// <returns>Full address of jpeg file.</returns>
-        public static string CaptureScreenToFile(string path, string name)
+        /// <param name="path">Folder path.</param>
+        /// <param name="name">Tên file.</param>
+        public static void CaptureScreenToFile(string path, string name, out string ad)
         {
             using (var bmpScreenshot = new Bitmap(PrimaryScreen.Bounds.Width, PrimaryScreen.Bounds.Height, Format32bppArgb))
             {
                 using (var gfxScreenshot = FromImage(bmpScreenshot))
                 {
                     gfxScreenshot.CopyFromScreen(PrimaryScreen.Bounds.X, PrimaryScreen.Bounds.Y, 0, 0, PrimaryScreen.Bounds.Size, SourceCopy);
-                    var ad = $"{path}\\{name}.jpg";
+                    ad = $"{path}\\{name}.jpg";
                     bmpScreenshot.Save(ad, Jpeg);
-                    return ad;
                 }
             }
         }
@@ -763,10 +802,10 @@ namespace YAN_Scripts
 
         #region Directory
         /// <summary>
-        /// If the folder not exists create the new folder.
+        /// Tạo folder nâng cấp.
         /// </summary>
-        /// <param name="path">Path of the folder.</param>
-        public static void CreateFolderAdvanced(string path)
+        /// <param name="path">Folder path.</param>
+        public static void CreateFolderAdv(string path)
         {
             if (!Directory.Exists(path))
             {
@@ -775,10 +814,10 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// If the folder exists delete the folder.
+        /// Xóa folder nâng cấp.
         /// </summary>
-        /// <param name="path">Path of the folder.</param>
-        public static void DelFolderAdvanced(string path)
+        /// <param name="path">Folder path.</param>
+        public static void DelFolderAdv(string path)
         {
             if (Directory.Exists(path))
             {
@@ -794,68 +833,44 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// If the folder exists delete the folder and create the new folder else create the new folder.
+        /// Khởi tạo lại folder mới.
         /// </summary>
-        /// <param name="path">Path of the folder.</param>
+        /// <param name="path">Folder path.</param>
         public static void ReCreateFolder(string path)
         {
-            DelFolderAdvanced(path);
+            DelFolderAdv(path);
             CreateDirectory(path);
         }
 
         /// <summary>
-        /// Delete all folder with header name.
+        /// Xóa tất cả các folder có chuỗi mặc định trong tên.
         /// </summary>
-        /// <param name="path">Path of the folder.</param>
-        /// <param name="name">Header name of folders.</param>
-        public static void DelAllFolderByName(string path, string name) => ForEach(GetDirectories(path, $"{name}*"), folder => DelFolderAdvanced(folder));
+        /// <param name="path">Folder path.</param>
+        /// <param name="str">Chuỗi mục tiêu.</param>
+        public static void DelAllFolderByText(string path, string str) => ForEach(GetDirectories(path, $"{str}*"), folder => DelFolderAdv(folder));
 
         /// <summary>
-        /// Copy folder.
+        /// Copy folder đến folder khác.
         /// </summary>
-        /// <param name="srcDirName">Folder source.</param>
-        /// <param name="destDirName">New address copy to.</param>
-        /// <param name="copySubDirs">With sub folder or not.</param>
-        public static void DirectoryCopy(string srcDirName, string destDirName, bool copySubDirs)
+        /// <param name="srcDirName">Folder gốc.</param>
+        /// <param name="destDirName">Folder cần copy đến.</param>
+        /// <param name="copSubDirs">Copy tất cả folder con hoặc không.</param>
+        public static void DirectoryCop(string srcDirName, string destDirName, bool copSubDirs)
         {
-            CreateFolderAdvanced(destDirName);
+            CreateFolderAdv(destDirName);
             ForEach(new DirectoryInfo(srcDirName).GetFiles(), file => file.CopyTo(Combine(destDirName, file.Name), false));
-            if (copySubDirs)
+            if (copSubDirs)
             {
-                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCopy(subdir.FullName, Combine(destDirName, subdir.Name), copySubDirs));
+                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCop(subdir.FullName, Combine(destDirName, subdir.Name), copSubDirs));
             }
         }
         #endregion
 
-        #region Console
-        //fields
-        private const byte SW_HIDE = 0;
-        private const byte SW_SHOW = 5;
-
-        //get window
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr GetConsoleWindow();
-
-        //show window
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        /// <summary>
-        /// Hide the console window.
-        /// </summary>
-        public static void HideConsole() => ShowWindow(GetConsoleWindow(), SW_HIDE);
-
-        /// <summary>
-        /// Show the console window.
-        /// </summary>
-        public static void ShowConsole() => ShowWindow(GetConsoleWindow(), SW_SHOW);
-        #endregion
-
         #region Form
         /// <summary>
-        /// Fade in the form when show.
+        /// Fade in form.
         /// </summary>
-        /// <param name="frm">The form showing.</param>
+        /// <param name="frm">Form áp dụng.</param>
         public static void FadeInFrm(Form frm)
         {
             while (frm.Opacity < 1)
@@ -867,9 +882,9 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Fade out the form when hide.
+        /// Fade out form.
         /// </summary>
-        /// <param name="frm">The form hiding.</param>
+        /// <param name="frm">Form áp dụng.</param>
         public static void FadeOutFrm(Form frm)
         {
             while (frm.Opacity > 0)
@@ -883,38 +898,26 @@ namespace YAN_Scripts
 
         #region Object
         /// <summary>
-        /// Get all objects of type in control.
+        /// Get tất cả control con theo loại.
         /// </summary>
-        /// <param name="ctrl">The control finding objects.</param>
-        /// <param name="type">Type of object finding.</param>
+        /// <param name="ctrl">Parent control.</param>
+        /// <param name="type">Loại control cần get.</param>
         /// <returns>Control list.</returns>
-        public static IEnumerable<Control> GetAllObj(Control ctrl, Type type)
+        public static IEnumerable<Control> GetAllCtrl(this Control ctrl, Type type)
         {
             var ctrls = ctrl.Controls.Cast<Control>();
-            return ctrls.SelectMany(obj => GetAllObj(obj, type)).Concat(ctrls).Where(c => c.GetType() == type);
+            return ctrls.SelectMany(obj => obj.GetAllCtrl(type)).Concat(ctrls).Where(c => c.GetType() == type);
         }
 
         /// <summary>
-        /// Find main panel.
+        /// Tạo list item cho combobox từ các file trong folder.
         /// </summary>
-        /// <param name="ctrl">The control focus.</param>
-        /// <param name="namePnl">Name of the panel.</param>
-        /// <returns>Main panel.</returns>
-        public static Panel FindMainPnl(Control ctrl, string namePnl)
-        {
-            var pnl = (Panel)ctrl.Parent;
-            return pnl.Name != namePnl ? FindMainPnl(pnl, namePnl) : pnl;
-        }
-
-        /// <summary>
-        /// Fill item list of combo box by all file in folder.
-        /// </summary>
-        /// <param name="cmb">The combo box fill item list.</param>
-        /// <param name="path">Path of folder.</param>
-        public static void CombFillByFolder(YANComboBox cmb, string path)
+        /// <param name="cmb">Combobox cần tạo list.</param>
+        /// <param name="path">Folder path.</param>
+        public static void CombGetItemListInFolder(this YANComboBox cmb, string path)
         {
             cmb.Items.Clear();
-            foreach (var file in GetFiles(path)) //need sort
+            foreach (var file in GetFiles(path))
             {
                 cmb.Items.Add(GetFileNameWithoutExtension(file));
             }
@@ -923,30 +926,30 @@ namespace YAN_Scripts
 
         #region Control
         /// <summary>
-        /// Uniform horizontal scale image to picture box.
+        /// Scale picturebox theo chiều ngang.
         /// </summary>
-        /// <param name="pic">The picture box used display image.</param>
-        public static void PicWZoom(PictureBox pic)
+        /// <param name="pic">Picturebox mục tiêu.</param>
+        public static void PicHorizontalScale(this PictureBox pic)
         {
             pic.SizeMode = Zoom;
-            pic.Image = CropImg(pic.Image, new Rectangle(0, 0, pic.Image.Width, pic.Image.Width));
+            pic.Image = pic.Image.Crop(new Rectangle(0, 0, pic.Image.Width, pic.Image.Width));
         }
 
         /// <summary>
-        /// Uniform vertical scale image to picture box.
+        /// Scale picturebox theo chiều dọc.
         /// </summary>
-        /// <param name="pic">The picture box used display image.</param>
-        public static void PicHZoom(PictureBox pic)
+        /// <param name="pic">Picturebox mục tiêu.</param>
+        public static void PicVerticalScale(this PictureBox pic)
         {
             pic.SizeMode = Zoom;
-            pic.Image = CropImg(pic.Image, new Rectangle(0, 0, pic.Image.Height, pic.Image.Height));
+            pic.Image = pic.Image.Crop(new Rectangle(0, 0, pic.Image.Height, pic.Image.Height));
         }
 
         /// <summary>
-        /// Check and start timer.
+        /// Chạy timer nâng cấp.
         /// </summary>
-        /// <param name="tmr">Timer checking.</param>
-        public static void TmrStartAdvanced(Timer tmr)
+        /// <param name="tmr">Timer mục tiêu.</param>
+        public static void TmrStartAdv(this Timer tmr)
         {
             if (!tmr.Enabled)
             {
@@ -955,10 +958,10 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Check and end timer.
+        /// Dừng timer nâng cấp.
         /// </summary>
-        /// <param name="tmr">Timer checking.</param>
-        public static void TmrEndAdvanced(Timer tmr)
+        /// <param name="tmr">Timer mục tiêu.</param>
+        public static void TmrEndAdv(this Timer tmr)
         {
             if (tmr.Enabled)
             {
@@ -967,15 +970,15 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Highlight state of title text when focus content control.
+        /// Highlight label link bằng tên control.
         /// </summary>
-        /// <param name="ctrl">Content control.</param>
-        /// <param name="nameCtrl">Common name of the control.</param>
-        /// <param name="cl">Color of title text.</param>
-        /// <param name="isBold">Format bold or regular.</param>
-        public static void SetHighLightLbl(Control ctrl, string nameCtrl, Color cl, bool isBold)
+        /// <param name="ctrl">Control mục tiêu.</param>
+        /// <param name="strType">Loại control.</param>
+        /// <param name="cl">Màu highlight.</param>
+        /// <param name="isBold">In đậm hoặc không.</param>
+        public static void HighLightLblLinkByName(this Control ctrl, string strType, Color cl, bool isBold)
         {
-            var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(nameCtrl.Length)}", true).FirstOrDefault();
+            var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(strType.Length)}", true).FirstOrDefault();
             lbl.ForeColor = cl;
             lbl.Font = isBold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
         }
@@ -983,10 +986,10 @@ namespace YAN_Scripts
 
         #region MessageBox
         /// <summary>
-        /// Show the message box error catch.
+        /// Hiện messagebox bắt lỗi.
         /// </summary>
         /// <param name="ex">Exception.</param>
-        public static void MsgBoxErrorCatch(string ex)
+        public static void MsgBoxCatchError(string ex)
         {
             MessageBox.Show(new Form
             {
@@ -997,211 +1000,211 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Show the message box none freedom text.
+        /// Hiện mẫu messagebox none nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="msg">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxNoneAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
+        public static DialogResult MsgboxNoneAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
 
         /// <summary>
-        /// Show the message box infomation freedom text.
+        /// Hiện mẫu messagebox infomation nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="msg">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxInfoAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        public static DialogResult MsgboxInfomationAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         /// <summary>
-        /// Show the message box question freedom text.
+        /// Hiện mẫu messagebox question nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="msg">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxQuestAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        public static DialogResult MsgboxQuestionAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
         /// <summary>
-        /// Show the message box warning freedom text.
+        /// Hiện mẫu messagebox warning nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxWarningAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+        public static DialogResult MsgboxWarningAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         /// <summary>
-        /// Show the message box exclamation freedom text.
+        /// Hiện mẫu messagebox exclamation nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxExclamationAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        public static DialogResult MsgboxExclamationAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
         /// <summary>
-        /// Show the message box error freedom text.
+        /// Hiện mẫu messagebox error nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxErrorAdvanced(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        public static DialogResult MsgboxErrorAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         /// <summary>
-        /// Show the message box none freedom text Japanese.
+        /// Hiện mẫu messagebox none tiếng Nhật nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxNoneAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
+        public static DialogResult MsgboxNoneAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
 
         /// <summary>
-        /// Show the message box infomation freedom text Japanese.
+        /// Hiện mẫu messagebox infomation tiếng Nhật nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxInfoAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
+        public static DialogResult MsgboxInfomationAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
 
         /// <summary>
-        /// Show the message box question freedom text Japanese.
+        /// Hiện mẫu messagebox question tiếng Nhật nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxQuestAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
+        public static DialogResult MsgboxQuestionAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
 
         /// <summary>
-        /// Show the message box warning freedom text Japanese.
+        /// Hiện mẫu messagebox warning tiếng Nhật nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxWarningAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
+        public static DialogResult MsgboxWarningAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
 
         /// <summary>
-        /// Show the message box exclamation freedom text Japanese.
+        /// Hiện mẫu messagebox exclamation tiếng Nhật nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxExclamationAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, JAP);
+        public static DialogResult MsgboxExclamationAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, JAP);
 
         /// <summary>
-        /// Show the message box error freedom text Japanese.
+        /// Hiện mẫu messagebox error tiếng Nhật nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxErrorAdvancedJP(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
+        public static DialogResult MsgboxErrorAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
 
         /// <summary>
-        /// Show the message box none freedom text Vietnamese.
+        /// Hiện mẫu messagebox none tiếng Việt nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxNoneAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
+        public static DialogResult MsgboxNoneAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
 
         /// <summary>
-        /// Show the message box infomation freedom text Vietnamese.
+        /// Hiện mẫu messagebox infomation tiếng Việt nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxInfoAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
+        public static DialogResult MsgboxInfomationAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
 
         /// <summary>
-        /// Show the message box question freedom text Vietnamese.
+        /// Hiện mẫu messagebox question tiếng Việt nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxQuestAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
+        public static DialogResult MsgboxQuestionAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
 
         /// <summary>
-        /// Show the message box warning freedom text Vietnamese.
+        /// Hiện mẫu messagebox warning tiếng Việt nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxWarningAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
+        public static DialogResult MsgboxWarningAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
 
         /// <summary>
-        /// Show the message box exclamation freedom text Vietnamese.
+        /// Hiện mẫu messagebox exclamation tiếng Việt nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxExclamationAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, VIE);
+        public static DialogResult MsgboxExclamationAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, VIE);
 
         /// <summary>
-        /// Show the message box error freedom text Vietnamese.
+        /// Hiện mẫu messagebox error tiếng Việt nâng cấp.
         /// </summary>
-        /// <param name="cap">Caption of message.</param>
-        /// <param name="mess">Text content.</param>
+        /// <param name="cap">Tiêu đề.</param>
+        /// <param name="msg">Nội dung.</param>
         /// <returns>Dialog result.</returns>
-        public static DialogResult MsgboxErrorAdvancedVN(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, VIE);
+        public static DialogResult MsgboxErrorAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, VIE);
         #endregion
 
         #region Animator
         /// <summary>
-        /// Show the control with sync effect.
+        /// Hiện control với animation đồng bộ.
         /// </summary>
-        /// <param name="ctrl">The showing control.</param>
-        /// <param name="animationType">Effect type.</param>
-        /// <param name="speed">FPMS.</param>
-        public static void ShowAnimatorSync(Control ctrl, AnimationType animationType, float speed)
+        /// <param name="ctrl">Control mục tiêu.</param>
+        /// <param name="type">Loại hiệu ứng.</param>
+        /// <param name="speed">Frame per milisecond.</param>
+        public static void ShowSync(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
-                AnimationType = animationType
+                AnimationType = type
             };
             animator.ShowSync(ctrl);
         }
 
         /// <summary>
-        /// Hide the control with sync effect.
+        /// Ẩn control với animation đồng bộ.
         /// </summary>
-        /// <param name="ctrl">The hiding control.</param>
-        /// <param name="animationType">Effect type.</param>
-        /// <param name="speed">FPMS.</param>
-        public static void HideAnimatorSync(Control ctrl, AnimationType animationType, float speed)
+        /// <param name="ctrl">Control mục tiêu.</param>
+        /// <param name="type">Loại hiệu ứng.</param>
+        /// <param name="speed">Frame per milisecond.</param>
+        public static void HideSync(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
-                AnimationType = animationType
+                AnimationType = type
             };
             animator.HideSync(ctrl);
         }
 
         /// <summary>
-        /// Show the control with async effect.
+        /// Hiện control với animation bất đồng bộ.
         /// </summary>
-        /// <param name="ctrl">The showing control.</param>
-        /// <param name="animationType">Effect type.</param>
-        /// <param name="speed">FPMS.</param>
-        public static void ShowAnimator(Control ctrl, AnimationType animationType, float speed)
+        /// <param name="ctrl">Control mục tiêu.</param>
+        /// <param name="type">Loại hiệu ứng.</param>
+        /// <param name="speed">Frame per milisecond.</param>
+        public static void ShowAsync(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
-                AnimationType = animationType
+                AnimationType = type
             };
             animator.Show(ctrl);
         }
 
         /// <summary>
-        /// Hide the control with async effect.
+        /// Ẩn control với animation bất đồng bộ.
         /// </summary>
-        /// <param name="ctrl">The hiding control.</param>
-        /// <param name="animationType">Effect type.</param>
-        /// <param name="speed">FPMS.</param>
-        public static void HideAnimator(Control ctrl, AnimationType animationType, float speed)
+        /// <param name="ctrl">Control mục tiêu.</param>
+        /// <param name="type">Loại hiệu ứng.</param>
+        /// <param name="speed">Frame per milisecond.</param>
+        public static void HideAsync(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
                 TimeStep = speed,
-                AnimationType = animationType
+                AnimationType = type
             };
             animator.Hide(ctrl);
         }
@@ -1209,11 +1212,11 @@ namespace YAN_Scripts
 
         #region Animate
         /// <summary>
-        /// Low animation sync.
+        /// Điều khiển object với animation đồng bộ.
         /// </summary>
-        /// <param name="hwand">Control.</param>
-        /// <param name="dwTime">Timer.</param>
-        /// <param name="dwFlags">Animation type.</param>
+        /// <param name="hwand">Object.</param>
+        /// <param name="dwTime">Thời gian tính bằng milisecond.</param>
+        /// <param name="dwFlags">Flag animate.</param>
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern void AnimateWindow(IntPtr hwand, int dwTime, AnimateWindowFlags dwFlags);
         #endregion

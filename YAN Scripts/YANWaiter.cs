@@ -22,11 +22,11 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Turn on waiter form.
+        /// Bật form waiter.
         /// </summary>
         /// <param name="frm">Parent form.</param>
-        /// <param name="cor">Radius border.</param>
-        /// <param name="onTop">Enable top most.</param>
+        /// <param name="cor">Góc bo của form.</param>
+        /// <param name="onTop">Hiển thị đè hoặc không.</param>
         public void OnLoader(Form frm, int cor, bool onTop)
         {
             _thread = new Thread(new ParameterizedThreadStart(LoadingPrc));
@@ -36,7 +36,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Turn off waiter form.
+        /// Tắt form waiter.
         /// </summary>
         public void OffLoader()
         {
