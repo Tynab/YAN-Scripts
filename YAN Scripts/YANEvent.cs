@@ -6,6 +6,8 @@ using YAN_Controls;
 using static AnimatorNS.AnimationType;
 using static System.Drawing.Color;
 using static YAN_Scripts.YANConstant;
+using static YAN_Scripts.YANMethod;
+using static System.Windows.Forms.Application;
 
 namespace YAN_Scripts
 {
@@ -49,6 +51,20 @@ namespace YAN_Scripts
         {
             _moveFrm = false;
             ((Control)sender).FindForm().Opacity = 1;
+        }
+        #endregion
+
+        #region Common
+        /// <summary>
+        /// Tắt app.
+        /// </summary>
+        public static void BtnX_Click(object sender, EventArgs e)
+        {
+            FadeOutFrm(((Button)sender).FindForm());
+            //sound
+            _sound_Next_.PlaySync();
+            //action
+            Exit();
         }
         #endregion
 

@@ -236,25 +236,36 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Chuyển ngày sang chuỗi định dạng Việt.
+        /// Chuyển ngày sang chuỗi định dạng Việt (dd/mm/yyyy).
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt.</returns>
         public static string ToDateStringVn(this DateTime dtm) => dtm.ToString("dd/MM/yyyy");
 
         /// <summary>
-        /// Chuyển ngày sang chuỗi định dạng Việt dùng để đặt tên file.
+        /// Chuyển ngày sang chuỗi định dạng Việt dùng để đặt tên file (dd-mm-yyyy).
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt để đặt tên file.</returns>
         public static string ToDateStringNameVn(this DateTime dtm) => dtm.ToString("dd-MM-yyyy");
 
         /// <summary>
-        /// Chuyển ngày sang chuỗi định dạng Việt theo kiểu từ ngày đến ngày.
+        /// Chuyển ngày sang chuỗi định dạng Việt theo kiểu từ ngày đến ngày (dd.mm.yyyy).
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt theo kiểu từ ngày đến ngày.</returns>
         public static string ToDateStringMultiVn(this DateTime dtm) => dtm.ToString("dd.MM.yyyy");
+
+        /// <summary>
+        /// Chuyển chuỗi sang số ngày Việt.
+        /// </summary>
+        /// <param name="str">Chuỗi cần chuyển có định dạng ngày Việt (dd/mm/yyyy).</param>
+        /// <returns>Ngày giờ.</returns>
+        public static DateTime ParseDateVn(this string str)
+        {
+            DtmTryParseExactEx(str, "dd/MM/yyyy", out var dtm);
+            return dtm;
+        }
         #endregion
 
         #region Ellipse Form
@@ -286,7 +297,7 @@ namespace YAN_Scripts
         /// <param name="str">Chuỗi cần chuyển.</param>
         /// <param name="format">Định dạng ngày của chuỗi.</param>
         /// <returns>Thành công hoặc thất bại.</returns>
-        public static bool TryParseExactEx(this string str, string format, out DateTime dtm) => TryParseExact(str, format, InvariantCulture, DateTimeStyles.None, out dtm);
+        public static bool DtmTryParseExactEx(string str, string format, out DateTime dtm) => TryParseExact(str, format, InvariantCulture, DateTimeStyles.None, out dtm);
 
         /// <summary>
         /// Chuyển chuỗi giờ phút sang giờ.
@@ -294,14 +305,14 @@ namespace YAN_Scripts
         /// <param name="hhmm">Chuỗi cần chuyển.</param>
         /// <param name="dtm">Giờ kết quả</param>
         /// <returns>Thành công hoặc thất bại.</returns>
-        public static bool TryParseFromHhmm(this string hhmm, out DateTime dtm) => TryParseExactEx(hhmm, "HH:mm", out dtm) || TryParseExactEx(hhmm, "h:mm", out dtm) || TryParseExactEx(hhmm, "HH:m", out dtm) || TryParseExactEx(hhmm, "h:m", out dtm);
+        public static bool DtmTryParseFromHhmm(string hhmm, out DateTime dtm) => DtmTryParseExactEx(hhmm, "HH:mm", out dtm) || DtmTryParseExactEx(hhmm, "h:mm", out dtm) || DtmTryParseExactEx(hhmm, "HH:m", out dtm) || DtmTryParseExactEx(hhmm, "h:m", out dtm);
 
         /// <summary>
         /// Chuyển chuỗi giờ phút sang số giờ.
         /// </summary>
         /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
-        public static double ParseFromHhmm(this string hm) => TryParseFromHhmm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
+        public static double ParseFromHhmm(this string hm) => DtmTryParseFromHhmm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
         /// Chuyển số phút sang chuỗi giờ phút.
