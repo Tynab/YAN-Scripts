@@ -756,9 +756,9 @@ namespace YAN_Scripts
         /// Get tất cả file trong folder.
         /// </summary>
         /// <param name="path">Folder path.</param>
-        /// <param name="detail">Đuôi của file cần lọc.</param>
+        /// <param name="str">Tên hoặc đuôi của file cần search.</param>
         /// <returns></returns>
-        public static FileInfo[] GetAllFileInFolder(string path, string detail) => new DirectoryInfo(path).GetFiles(detail).OrderBy(f => f.Name).ToArray();
+        public static FileInfo[] GetAllFilesInFolder(string path, string str) => new DirectoryInfo(path).GetFiles(str).OrderBy(f => f.Name).ToArray();
 
         /// <summary>
         /// Xóa file nâng cấp.
@@ -784,7 +784,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="ad">File address.</param>
         /// <param name="bytes">Mảng byte.</param>
-        public static void FileWriteBytesAdv(string ad, byte[] bytes)
+        public static void WriteAllBytesToFileAdv(string ad, byte[] bytes)
         {
             if (!File.Exists(ad))
             {
@@ -793,11 +793,11 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// lưu trữ ảnh chụp màn hình.
+        /// Lưu trữ ảnh chụp màn hình.
         /// </summary>
         /// <param name="path">Folder path.</param>
         /// <param name="name">Tên file.</param>
-        public static void CaptureScreenToFile(string path, string name, out string ad)
+        public static void CapScreenShotToFile(string path, string name, out string ad)
         {
             using (var bmpScreenshot = new Bitmap(PrimaryScreen.Bounds.Width, PrimaryScreen.Bounds.Height, Format32bppArgb))
             {
@@ -858,7 +858,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="path">Folder path.</param>
         /// <param name="str">Chuỗi mục tiêu.</param>
-        public static void DelAllFolderByText(string path, string str) => ForEach(GetDirectories(path, $"{str}*"), folder => DelFolderAdv(folder));
+        public static void DelAllFoldersByText(string path, string str) => ForEach(GetDirectories(path, $"{str}*"), folder => DelFolderAdv(folder));
 
         /// <summary>
         /// Copy folder đến folder khác.
@@ -882,7 +882,7 @@ namespace YAN_Scripts
         /// Fade in form.
         /// </summary>
         /// <param name="frm">Form áp dụng.</param>
-        public static void FadeInFrm(Form frm)
+        public static void FadeInFrm(this Form frm)
         {
             while (frm.Opacity < 1)
             {
@@ -896,7 +896,7 @@ namespace YAN_Scripts
         /// Fade out form.
         /// </summary>
         /// <param name="frm">Form áp dụng.</param>
-        public static void FadeOutFrm(Form frm)
+        public static void FadeOutFrm(this Form frm)
         {
             while (frm.Opacity > 0)
             {
@@ -914,10 +914,10 @@ namespace YAN_Scripts
         /// <param name="ctrl">Parent control.</param>
         /// <param name="type">Loại control cần get.</param>
         /// <returns>Control list.</returns>
-        public static IEnumerable<Control> GetAllCtrl(this Control ctrl, Type type)
+        public static IEnumerable<Control> GetAllObjs(this Control ctrl, Type type)
         {
             var ctrls = ctrl.Controls.Cast<Control>();
-            return ctrls.SelectMany(obj => obj.GetAllCtrl(type)).Concat(ctrls).Where(c => c.GetType() == type);
+            return ctrls.SelectMany(obj => obj.GetAllObjs(type)).Concat(ctrls).Where(c => c.GetType() == type);
         }
 
         /// <summary>
@@ -925,7 +925,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="cmb">Combobox cần tạo list.</param>
         /// <param name="path">Folder path.</param>
-        public static void CombGetItemListInFolder(this YANComboBox cmb, string path)
+        public static void GetItemListFromFilesInFolder(this YANComboBox cmb, string path)
         {
             cmb.Items.Clear();
             foreach (var file in GetFiles(path))
@@ -984,12 +984,12 @@ namespace YAN_Scripts
         /// Highlight label link bằng tên control.
         /// </summary>
         /// <param name="ctrl">Control mục tiêu.</param>
-        /// <param name="strType">Loại control.</param>
+        /// <param name="typeName">Loại control.</param>
         /// <param name="cl">Màu highlight.</param>
         /// <param name="isBold">In đậm hoặc không.</param>
-        public static void HighLightLblLinkByName(this Control ctrl, string strType, Color cl, bool isBold)
+        public static void HighLightLblLinkByCtrl(this Control ctrl, string typeName, Color cl, bool isBold)
         {
-            var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(strType.Length)}", true).FirstOrDefault();
+            var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(typeName.Length)}", true).FirstOrDefault();
             lbl.ForeColor = cl;
             lbl.Font = isBold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
         }
@@ -1162,7 +1162,7 @@ namespace YAN_Scripts
         /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
-        public static void ShowSync(this Control ctrl, AnimationType type, float speed)
+        public static void ShowAnimator(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
@@ -1178,7 +1178,7 @@ namespace YAN_Scripts
         /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
-        public static void HideSync(this Control ctrl, AnimationType type, float speed)
+        public static void HideAnimator(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
@@ -1194,7 +1194,7 @@ namespace YAN_Scripts
         /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
-        public static void ShowAsync(this Control ctrl, AnimationType type, float speed)
+        public static void ShowAnimatorAsync(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {
@@ -1210,7 +1210,7 @@ namespace YAN_Scripts
         /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
-        public static void HideAsync(this Control ctrl, AnimationType type, float speed)
+        public static void HideAnimatorAsync(this Control ctrl, AnimationType type, float speed)
         {
             var animator = new Animator
             {

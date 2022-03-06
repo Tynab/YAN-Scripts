@@ -76,7 +76,7 @@ namespace YAN_Scripts
         {
             var btn = (Button)sender;
             btn.Hide();
-            btn.ShowAsync(Scale, _animatorSpeed_ * 2);
+            btn.ShowAnimatorAsync(Scale, _animatorSpeed_ * 2);
         }
         #endregion
 
@@ -88,7 +88,7 @@ namespace YAN_Scripts
         {
             var btn = (YANButton)sender;
             btn.BorderSize = 1;
-            btn.HighLightLblLinkByName("button", btn.BorderColor, true);
+            btn.HighLightLblLinkByCtrl("button", btn.BorderColor, true);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace YAN_Scripts
         {
             var btn = (YANButton)sender;
             btn.BorderSize = 0;
-            btn.HighLightLblLinkByName("button", btn.ForeColor, true);
+            btn.HighLightLblLinkByCtrl("button", btn.ForeColor, true);
         }
         #endregion
 
