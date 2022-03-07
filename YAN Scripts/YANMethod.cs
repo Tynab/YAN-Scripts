@@ -487,6 +487,20 @@ namespace YAN_Scripts
         public static DataTable SortByNumCol(this DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
 
         /// <summary>
+        /// Filter datatable theo giá trị.
+        /// </summary>
+        /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
+        /// <param name="dt">Datatable filter.</param>
+        /// <param name="dcName">Tên cột filter.</param>
+        /// <param name="val">Giá trị filter.</param>
+        /// <returns>Datatable mới đã filter.</returns>
+        public static DataTable Filter<T>(this DataTable dt, string dcName, T val)
+        {
+            dynamic x = val;
+            return dt.AsEnumerable().Where(row => row.Field<T>(dcName) == x).CopyToDataTable();
+        }
+
+        /// <summary>
         /// Datatable thêm dòng mới.
         /// </summary>
         /// <param name="dt">Datatable cần thêm dòng.</param>
