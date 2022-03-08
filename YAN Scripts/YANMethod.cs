@@ -326,6 +326,17 @@ namespace YAN_Scripts
         }
 
         /// <summary>
+        /// Chuyển số phút sang chuỗi giờ phút.
+        /// </summary>
+        /// <param name="mm">Số phút cần chuyển.</param>
+        /// <returns>Chuỗi giờ phút</returns>
+        public static string ToHhmmFromMm(this int mm)
+        {
+            var timeSpan = FromHours(mm);
+            return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
+        }
+
+        /// <summary>
         /// Lấy ngày giờ online nâng cấp.
         /// </summary>
         /// <returns>Ngày giờ quốc tế.</returns>
