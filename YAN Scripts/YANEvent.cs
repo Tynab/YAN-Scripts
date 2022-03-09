@@ -5,9 +5,8 @@ using System.Windows.Forms;
 using YAN_Controls;
 using static AnimatorNS.AnimationType;
 using static System.Drawing.Color;
-using static YAN_Scripts.YANConstant;
-using static YAN_Scripts.YANMethod;
 using static System.Windows.Forms.Application;
+using static YAN_Scripts.YANConstant;
 
 namespace YAN_Scripts
 {
@@ -60,7 +59,7 @@ namespace YAN_Scripts
         /// </summary>
         public static void BtnX_Click(object sender, EventArgs e)
         {
-            FadeOutFrm(((Button)sender).FindForm());
+            ((Button)sender).FindForm().FadeOutFrm();
             //sound
             _sound_Next_.PlaySync();
             //action
