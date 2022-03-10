@@ -786,6 +786,14 @@ namespace YAN_Scripts
         public static FileInfo[] GetAllFilesInFolder(string path, string str) => new DirectoryInfo(path).GetFiles(str).OrderBy(f => f.Name).ToArray();
 
         /// <summary>
+        /// Get tất cả file trong tất cả folder con.
+        /// </summary>
+        /// <param name="path">Folder path.</param>
+        /// <param name="str">Tên hoặc đuôi của file cần search.</param>
+        /// <returns></returns>
+        public static FileInfo[] GetAllFilesInAllFolders(string path, string str) => new DirectoryInfo(path).GetFiles(str, SearchOption.AllDirectories).OrderBy(f => f.Name).ToArray();
+
+        /// <summary>
         /// Xóa file nâng cấp.
         /// </summary>
         /// <param name="ad">File address.</param>
