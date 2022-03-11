@@ -518,6 +518,19 @@ namespace YAN_Scripts
         public static void AddNewRow(this DataTable dt) => dt.Rows.Add(dt.NewRow());
 
         /// <summary>
+        /// Datatable thêm n dòng mới.
+        /// </summary>
+        /// <param name="dt">Datatable cần thêm dòng.</param>
+        /// <param name="n">Số lượng dòng muốn thêm vào datatable.</param>
+        public static void AddNewRows(this DataTable dt, int n)
+        {
+            for (var i = 1; i <= n; i++)
+            {
+                dt.AddNewRow();
+            }
+        }
+
+        /// <summary>
         /// Datatable thêm cột tại vị trí.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
