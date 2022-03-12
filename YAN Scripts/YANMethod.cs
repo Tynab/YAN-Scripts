@@ -585,6 +585,7 @@ namespace YAN_Scripts
                 var dgv = new DataGridView
                 {
                     ClipboardCopyMode = EnableWithoutHeaderText,
+                    AllowUserToAddRows = false,
                     DataSource = dt
                 };
                 frm.Controls.Add(dgv);
