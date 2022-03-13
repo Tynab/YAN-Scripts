@@ -236,32 +236,46 @@ namespace YAN_Scripts
         }
 
         /// <summary>
+        /// Chuyển giờ sang chuỗi định dạng Việt (hh:mm:ss).
+        /// </summary>
+        /// <param name="dtm">Giờ cần chuyển.</param>
+        /// <returns>Chuỗi định dạng giờ Việt.</returns>
+        public static string ToTimeStrVn(this DateTime dtm) => dtm.ToString("HH:mm:ss");
+
+        /// <summary>
+        /// Chuyển giờ sang chuỗi định dạng Việt dùng để đặt tên file (hh-mm-ss).
+        /// </summary>
+        /// <param name="dtm">Giờ cần chuyển.</param>
+        /// <returns>Chuỗi định dạng giờ Việt để đặt tên file.</returns>
+        public static string ToTimeStrNameVn(this DateTime dtm) => dtm.ToString("HH-mm-ss");
+
+        /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt (dd/mm/yyyy).
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt.</returns>
-        public static string ToDateStringVn(this DateTime dtm) => dtm.ToString("dd/MM/yyyy");
+        public static string ToDateStrVn(this DateTime dtm) => dtm.ToString("dd/MM/yyyy");
 
         /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt dùng để đặt tên file (dd-mm-yyyy).
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt để đặt tên file.</returns>
-        public static string ToDateStringNameVn(this DateTime dtm) => dtm.ToString("dd-MM-yyyy");
+        public static string ToDateStrNameVn(this DateTime dtm) => dtm.ToString("dd-MM-yyyy");
 
         /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt theo kiểu từ ngày đến ngày (dd.mm.yyyy).
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt theo kiểu từ ngày đến ngày.</returns>
-        public static string ToDateStringMultiVn(this DateTime dtm) => dtm.ToString("dd.MM.yyyy");
+        public static string ToDateStrMultiVn(this DateTime dtm) => dtm.ToString("dd.MM.yyyy");
 
         /// <summary>
         /// Chuyển chuỗi sang số ngày Việt.
         /// </summary>
         /// <param name="str">Chuỗi cần chuyển có định dạng ngày Việt (dd/mm/yyyy).</param>
         /// <returns>Ngày giờ.</returns>
-        public static DateTime ParseDateVn(this string str)
+        public static DateTime ParseDtmVn(this string str)
         {
             DtmTryParseExactEx(str, "dd/MM/yyyy", out var dtm);
             return dtm;
@@ -337,7 +351,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Lấy ngày giờ online nâng cấp.
+        /// Lấy ngày giờ online.
         /// </summary>
         /// <returns>Ngày giờ quốc tế.</returns>
         public static DateTime DtmOnlAdv()
@@ -370,7 +384,7 @@ namespace YAN_Scripts
         /// <param name="dtmSt">Ngày thứ nhất.</param>
         /// <param name="dtmNd">Ngày thứ 2.</param>
         /// <returns>Số tháng được tính.</returns>
-        public static int DtmTotalMonth(DateTime dtmSt, DateTime dtmNd) => dtmNd > dtmSt ? (dtmNd.Year - dtmSt.Year) * 12 + dtmNd.Month - dtmSt.Month : (dtmSt.Year - dtmNd.Year) * 12 + dtmSt.Month - dtmNd.Month;
+        public static int DtmTotalWw(DateTime dtmSt, DateTime dtmNd) => dtmNd > dtmSt ? (dtmNd.Year - dtmSt.Year) * 12 + dtmNd.Month - dtmSt.Month : (dtmSt.Year - dtmNd.Year) * 12 + dtmSt.Month - dtmNd.Month;
         #endregion
 
         #region Math
@@ -808,7 +822,7 @@ namespace YAN_Scripts
         public static FileInfo[] GetAllFilesInAllFolders(string path, string str) => new DirectoryInfo(path).GetFiles(str, SearchOption.AllDirectories).OrderBy(f => f.Name).ToArray();
 
         /// <summary>
-        /// Xóa file nâng cấp.
+        /// Xóa file.
         /// </summary>
         /// <param name="ad">File address.</param>
         public static void DelFileAdv(string ad)
@@ -827,7 +841,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Ghi file bằng mảng byte nâng cấp.
+        /// Ghi file bằng mảng byte.
         /// </summary>
         /// <param name="ad">File address.</param>
         /// <param name="bytes">Mảng byte.</param>
@@ -860,7 +874,7 @@ namespace YAN_Scripts
 
         #region Directory
         /// <summary>
-        /// Tạo folder nâng cấp.
+        /// Tạo folder.
         /// </summary>
         /// <param name="path">Folder path.</param>
         public static void CreateFolderAdv(string path)
@@ -872,7 +886,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Xóa folder nâng cấp.
+        /// Xóa folder.
         /// </summary>
         /// <param name="path">Folder path.</param>
         public static void DelFolderAdv(string path)
@@ -1004,7 +1018,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Chạy timer nâng cấp.
+        /// Chạy timer.
         /// </summary>
         /// <param name="tmr">Timer mục tiêu.</param>
         public static void TmrStartAdv(this Timer tmr)
@@ -1016,7 +1030,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Dừng timer nâng cấp.
+        /// Dừng timer.
         /// </summary>
         /// <param name="tmr">Timer mục tiêu.</param>
         public static void TmrEndAdv(this Timer tmr)
@@ -1058,7 +1072,7 @@ namespace YAN_Scripts
         }
 
         /// <summary>
-        /// Hiện mẫu messagebox none nâng cấp.
+        /// Hiện mẫu messagebox none.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1066,7 +1080,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxNoneAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None);
 
         /// <summary>
-        /// Hiện mẫu messagebox infomation nâng cấp.
+        /// Hiện mẫu messagebox infomation.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1074,7 +1088,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxInfomationAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         /// <summary>
-        /// Hiện mẫu messagebox question nâng cấp.
+        /// Hiện mẫu messagebox question.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1082,7 +1096,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxQuestionAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
         /// <summary>
-        /// Hiện mẫu messagebox warning nâng cấp.
+        /// Hiện mẫu messagebox warning.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1090,7 +1104,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxWarningAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
         /// <summary>
-        /// Hiện mẫu messagebox exclamation nâng cấp.
+        /// Hiện mẫu messagebox exclamation.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1098,7 +1112,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxExclamationAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
         /// <summary>
-        /// Hiện mẫu messagebox error nâng cấp.
+        /// Hiện mẫu messagebox error.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1106,7 +1120,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxErrorAdv(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         /// <summary>
-        /// Hiện mẫu messagebox none tiếng Nhật nâng cấp.
+        /// Hiện mẫu messagebox none tiếng Nhật.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1114,7 +1128,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxNoneAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, JAP);
 
         /// <summary>
-        /// Hiện mẫu messagebox infomation tiếng Nhật nâng cấp.
+        /// Hiện mẫu messagebox infomation tiếng Nhật.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1122,7 +1136,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxInfomationAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, JAP);
 
         /// <summary>
-        /// Hiện mẫu messagebox question tiếng Nhật nâng cấp.
+        /// Hiện mẫu messagebox question tiếng Nhật.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1130,7 +1144,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxQuestionAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, JAP);
 
         /// <summary>
-        /// Hiện mẫu messagebox warning tiếng Nhật nâng cấp.
+        /// Hiện mẫu messagebox warning tiếng Nhật.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1138,7 +1152,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxWarningAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, JAP);
 
         /// <summary>
-        /// Hiện mẫu messagebox exclamation tiếng Nhật nâng cấp.
+        /// Hiện mẫu messagebox exclamation tiếng Nhật.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1146,7 +1160,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxExclamationAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, JAP);
 
         /// <summary>
-        /// Hiện mẫu messagebox error tiếng Nhật nâng cấp.
+        /// Hiện mẫu messagebox error tiếng Nhật.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1154,7 +1168,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxErrorAdvJp(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Error, JAP);
 
         /// <summary>
-        /// Hiện mẫu messagebox none tiếng Việt nâng cấp.
+        /// Hiện mẫu messagebox none tiếng Việt.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1162,7 +1176,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxNoneAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.None, VIE);
 
         /// <summary>
-        /// Hiện mẫu messagebox infomation tiếng Việt nâng cấp.
+        /// Hiện mẫu messagebox infomation tiếng Việt.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1170,7 +1184,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxInfomationAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Information, VIE);
 
         /// <summary>
-        /// Hiện mẫu messagebox question tiếng Việt nâng cấp.
+        /// Hiện mẫu messagebox question tiếng Việt.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1178,7 +1192,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxQuestionAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.YesNo, MessageBoxIcon.Question, VIE);
 
         /// <summary>
-        /// Hiện mẫu messagebox warning tiếng Việt nâng cấp.
+        /// Hiện mẫu messagebox warning tiếng Việt.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1186,7 +1200,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxWarningAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, VIE);
 
         /// <summary>
-        /// Hiện mẫu messagebox exclamation tiếng Việt nâng cấp.
+        /// Hiện mẫu messagebox exclamation tiếng Việt.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
@@ -1194,7 +1208,7 @@ namespace YAN_Scripts
         public static DialogResult MsgboxExclamationAdvVn(string cap, string msg) => Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, VIE);
 
         /// <summary>
-        /// Hiện mẫu messagebox error tiếng Việt nâng cấp.
+        /// Hiện mẫu messagebox error tiếng Việt.
         /// </summary>
         /// <param name="cap">Tiêu đề.</param>
         /// <param name="msg">Nội dung.</param>
