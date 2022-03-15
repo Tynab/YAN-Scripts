@@ -532,19 +532,6 @@ namespace YAN_Scripts
         public static void AddNewRow(this DataTable dt) => dt.Rows.Add(dt.NewRow());
 
         /// <summary>
-        /// Datatable thêm n dòng mới.
-        /// </summary>
-        /// <param name="dt">Datatable cần thêm dòng.</param>
-        /// <param name="n">Số lượng dòng muốn thêm vào datatable.</param>
-        public static void AddNewRows(this DataTable dt, int n)
-        {
-            for (var i = 1; i <= n; i++)
-            {
-                dt.AddNewRow();
-            }
-        }
-
-        /// <summary>
         /// Datatable thêm cột tại vị trí.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
@@ -583,6 +570,13 @@ namespace YAN_Scripts
         /// <param name="dtSrc">Datatable cần chép.</param>
         /// <param name="dtDest">Datatable nhận.</param>
         public static void CopReverseTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDest, OverwriteChanges);
+
+        /// <summary>
+        /// Đảo nghịch datatable.
+        /// </summary>
+        /// <param name="dt">Datatable cần đảo.</param>
+        /// <returns>Datatable đảo ngịch.</returns>
+        public static DataTable ReverseAdv(this DataTable dt) => dt.AsEnumerable().Take(dt.Rows.Count).Reverse().CopyToDataTable();
 
         /// <summary>
         /// Chép datatable lên clipboard.
