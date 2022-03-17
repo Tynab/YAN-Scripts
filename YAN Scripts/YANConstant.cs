@@ -21,6 +21,8 @@ namespace YAN_Scripts
         public const string _nameCo_ = "Nephilim";
         public const string _numFormat_ = "N0";
         public const string _timezoneVn_ = "07:00:00";
+        public const string _formatDateVn_ = "dd/MM/yyyy";
+        public const string _formatTimeVn_ = "HH:mm:ss";
         public const string _xlFormatText_ = "@";
         public const string _xlFormatNum_ = "#,##0";
         public const string _codeFormatText = "Unicode Text";

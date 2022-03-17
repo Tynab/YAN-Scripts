@@ -240,7 +240,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="dtm">Giờ cần chuyển.</param>
         /// <returns>Chuỗi định dạng giờ Việt.</returns>
-        public static string ToTimeStrVn(this DateTime dtm) => dtm.ToString("HH:mm:ss");
+        public static string ToTimeStrVn(this DateTime dtm) => dtm.ToString(_formatTimeVn_);
 
         /// <summary>
         /// Chuyển giờ sang chuỗi định dạng Việt dùng để đặt tên file (hh-mm-ss).
@@ -254,7 +254,7 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt.</returns>
-        public static string ToDateStrVn(this DateTime dtm) => dtm.ToString("dd/MM/yyyy");
+        public static string ToDateStrVn(this DateTime dtm) => dtm.ToString(_formatDateVn_);
 
         /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt dùng để đặt tên file (dd-mm-yyyy).
@@ -277,7 +277,7 @@ namespace YAN_Scripts
         /// <returns>Ngày giờ.</returns>
         public static DateTime ParseDtmVn(this string str)
         {
-            DtmTryParseExactEx(str, "dd/MM/yyyy", out var dtm);
+            DtmTryParseExactEx(str, _formatDateVn_, out var dtm);
             return dtm;
         }
         #endregion
