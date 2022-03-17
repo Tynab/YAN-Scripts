@@ -599,8 +599,7 @@ namespace YAN_Scripts
                 frm.Controls.Add(dgv);
                 frm.Show();
                 dgv.SelectAll();
-                var ods = dgv.GetClipboardContent().GetText();
-                SetText(ods);
+                SetText(dgv.GetClipboardContent().GetText());
             }
         }
 
