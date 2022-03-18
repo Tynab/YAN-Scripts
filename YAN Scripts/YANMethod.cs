@@ -207,7 +207,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Chuyển số sang chữ Việt.
         /// </summary>
-        /// <param name="num">Số cần chuyển</param>
         /// <returns>Chuỗi số bằng chữ tiếng Việt.</returns>
         public static string ToWordsVn(this int num)
         {
@@ -238,42 +237,36 @@ namespace YAN_Scripts
         /// <summary>
         /// Chuyển giờ sang chuỗi định dạng Việt (hh:mm:ss).
         /// </summary>
-        /// <param name="dtm">Giờ cần chuyển.</param>
         /// <returns>Chuỗi định dạng giờ Việt.</returns>
         public static string ToTimeStrVn(this DateTime dtm) => dtm.ToString(_formatTimeVn_);
 
         /// <summary>
         /// Chuyển giờ sang chuỗi định dạng Việt dùng để đặt tên file (hh-mm-ss).
         /// </summary>
-        /// <param name="dtm">Giờ cần chuyển.</param>
         /// <returns>Chuỗi định dạng giờ Việt để đặt tên file.</returns>
         public static string ToTimeStrNameVn(this DateTime dtm) => dtm.ToString("HH-mm-ss");
 
         /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt (dd/mm/yyyy).
         /// </summary>
-        /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt.</returns>
         public static string ToDateStrVn(this DateTime dtm) => dtm.ToString(_formatDateVn_);
 
         /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt dùng để đặt tên file (dd-mm-yyyy).
         /// </summary>
-        /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt để đặt tên file.</returns>
         public static string ToDateStrNameVn(this DateTime dtm) => dtm.ToString("dd-MM-yyyy");
 
         /// <summary>
         /// Chuyển ngày sang chuỗi định dạng Việt theo kiểu từ ngày đến ngày (dd.mm.yyyy).
         /// </summary>
-        /// <param name="dtm">Ngày cần chuyển.</param>
         /// <returns>Chuỗi định dạng ngày Việt theo kiểu từ ngày đến ngày.</returns>
         public static string ToDateStrMultiVn(this DateTime dtm) => dtm.ToString("dd.MM.yyyy");
 
         /// <summary>
         /// Chuyển chuỗi sang số ngày Việt.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển có định dạng ngày Việt (dd/mm/yyyy).</param>
         /// <returns>Ngày giờ.</returns>
         public static DateTime ParseDtmVn(this string str)
         {
@@ -301,7 +294,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Lấy số tuần của năm dựa trên ngày.
         /// </summary>
-        /// <param name="dtm">Ngày mục tiêu.</param>
         /// <returns>Số thứ tự tuần chứa ngày mục tiêu trong năm.</returns>
         public static int WeekOfYear(this DateTime dtm) => CurrentInfo.Calendar.GetWeekOfYear(dtm, CurrentInfo.CalendarWeekRule, CurrentInfo.FirstDayOfWeek);
 
@@ -324,14 +316,12 @@ namespace YAN_Scripts
         /// <summary>
         /// Chuyển chuỗi giờ phút sang số giờ.
         /// </summary>
-        /// <param name="hm">Hour and minute text.</param>
         /// <returns>Time hour.</returns>
         public static double ParseFromHhmm(this string hm) => DtmTryParseFromHhmm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
         /// Chuyển số phút sang chuỗi giờ phút.
         /// </summary>
-        /// <param name="mm">Số phút cần chuyển.</param>
         /// <returns>Chuỗi giờ phút</returns>
         public static string ToHhmmFromMm(this double mm)
         {
@@ -342,7 +332,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Chuyển số phút sang chuỗi giờ phút.
         /// </summary>
-        /// <param name="mm">Số phút cần chuyển.</param>
         /// <returns>Chuỗi giờ phút</returns>
         public static string ToHhmmFromMm(this int mm)
         {
@@ -391,21 +380,18 @@ namespace YAN_Scripts
         /// <summary>
         /// Làm tròn lên 0.5.
         /// </summary>
-        /// <param name="num">Số cần làm tròn.</param>
         /// <returns>Số đã được làm tròn.</returns>
         public static double RoundUpHalf(this double num) => Ceiling(num * 2) / 2;
 
         /// <summary>
         /// Làm tròn xuống 0.5.
         /// </summary>
-        /// <param name="num">Số cần làm tròn.</param>
         /// <returns>Số đã được làm tròn.</returns>
         public static double RoundDownHalf(this double num) => Floor(num * 2) / 2;
 
         /// <summary>
         /// Chuyển chuỗi sang số double.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Số kiểu double.</returns>
         public static double ParseDouble(this string str)
         {
@@ -416,7 +402,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Chuyển chuỗi sang số int.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Số kiểu int.</returns>
         public static int ParseInt(this string str)
         {
@@ -490,23 +475,20 @@ namespace YAN_Scripts
         /// Chuyển dữ liệu từ database.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
-        /// <param name="obj">Dữ liệu mục tiêu.</param>
         /// <returns>Giá trị được chuyển.</returns>
         public static T ToVal<T>(this object obj) => obj == null || obj == Value ? default : (T)obj;
 
         /// <summary>
         /// Tìm vị trí dòng trong datatable chứa ô có chuỗi cần tìm.
         /// </summary>
-        /// <param name="dt">Datatable tìm kiếm.</param>
         /// <param name="dcName">Tên cột tìm kiếm.</param>
         /// <param name="str">Chuỗi cần tìm.</param>
         /// <returns>Vị trí dòng trong datatable.</returns>
         public static int SearchRowIndexWithText(this DataTable dt, string dcName, string str) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{str}'")[0]);
 
         /// <summary>
-        /// Sort datatable theo cột số từ nhỏ đến lớn.
+        /// Sort datatable theo cột số từ nhỏ đến lớn (không an toàn).
         /// </summary>
-        /// <param name="dt">Datatable sort.</param>
         /// <param name="dcName">Tên cột sort.</param>
         /// <returns>Datatable mới đã sort.</returns>
         public static DataTable SortByNumCol(this DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
@@ -515,7 +497,6 @@ namespace YAN_Scripts
         /// Filter datatable theo giá trị.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
-        /// <param name="dt">Datatable filter.</param>
         /// <param name="dcName">Tên cột filter.</param>
         /// <param name="val">Giá trị filter.</param>
         /// <returns>Datatable mới đã filter.</returns>
@@ -528,14 +509,24 @@ namespace YAN_Scripts
         /// <summary>
         /// Datatable thêm dòng mới.
         /// </summary>
-        /// <param name="dt">Datatable cần thêm dòng.</param>
         public static void AddNewRow(this DataTable dt) => dt.Rows.Add(dt.NewRow());
+
+        /// <summary>
+        /// Datatable thêm dòng có sẵn value.
+        /// </summary>
+        /// <param name="drs">Những dòng được chọn.</param>
+        public static void AddRows(this DataTable dt, params DataRow[] drs)
+        {
+            foreach (var dr in drs)
+            {
+                dt.Rows.Add(dr.ItemArray);
+            }
+        }
 
         /// <summary>
         /// Datatable thêm cột tại vị trí.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
-        /// <param name="dt">Datatable cần thêm cột.</param>
         /// <param name="dcName">Tên cột cần thêm.</param>
         /// <param name="i">Vị trí cột cần thêm.</param>
         public static void AddColAt<T>(this DataTable dt, string dcName, int i) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(i);
@@ -543,7 +534,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Datatable cắt cột theo mẫu.
         /// </summary>
-        /// <param name="dtDest">Datatable cần đồng bộ.</param>
         /// <param name="dtSrc">Datatable mẫu.</param>
         public static void SyncColTo(this DataTable dtDest, DataTable dtSrc)
         {
@@ -560,28 +550,24 @@ namespace YAN_Scripts
         /// <summary>
         /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
-        /// <param name="dtSrc">Datatable cần chép.</param>
         /// <param name="dtDest">Datatable nhận.</param>
         public static void CopTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
 
         /// <summary>
         /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
         /// </summary>
-        /// <param name="dtSrc">Datatable cần chép.</param>
         /// <param name="dtDest">Datatable nhận.</param>
         public static void CopReverseTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDest, OverwriteChanges);
 
         /// <summary>
         /// Đảo nghịch datatable.
         /// </summary>
-        /// <param name="dt">Datatable cần đảo.</param>
         /// <returns>Datatable đảo ngịch.</returns>
         public static DataTable ReverseAdv(this DataTable dt) => dt.AsEnumerable().Take(dt.Rows.Count).Reverse().CopyToDataTable();
 
         /// <summary>
         /// Chép datatable lên clipboard.
         /// </summary>
-        /// <param name="dt">Datatable cần chép.</param>
         public static void ToClipboard(this DataTable dt)
         {
             using (var frm = new Form
@@ -606,7 +592,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Gộp datatable.
         /// </summary>
-        /// <param name="dtDest">Datatable gộp.</param>
         /// <param name="dtsSrc">Chuỗi datatable.</param>
         public static void MergeEx(this DataTable dtDest, params DataTable[] dtsSrc)
         {
@@ -622,7 +607,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Chuyển datagridview sang datatable.
         /// </summary>
-        /// <param name="dgv">Datagridview cần chuyển.</param>
         /// <returns>Datatable đã được chuyển.</returns>
         public static DataTable ToDt(this DataGridView dgv)
         {
@@ -646,7 +630,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Thay đổi trạng thái double buffered của datagridview.
         /// </summary>
-        /// <param name="dgv">Datagridview thay đổi.</param>
         /// <param name="state">Trạng thái thay đổi.</param>
         public static void DubBuffered(this DataGridView dgv, bool state)
         {
@@ -659,14 +642,12 @@ namespace YAN_Scripts
         /// <summary>
         /// Thay đổi trạng thái auto size của datagridview.
         /// </summary>
-        /// <param name="dgv">Datagridview thay đổi.</param>
         /// <param name="state">Trạng thái thay đổi.</param>
         public static void AutoSizeMod(this DataGridView dgv, bool state) => dgv.AutoSizeColumnsMode = state ? AllCells : DataGridViewAutoSizeColumnsMode.None;
 
         /// <summary>
         /// Tự động khởi tạo lại cột số thứ tự cho datagridview khóa dòng.
         /// </summary>
-        /// <param name="dgv">Datagridview nguồn.</param>
         public static void AutoNoColLock(this DataGridView dgv)
         {
             foreach (DataGridViewRow dgvr in dgv.Rows)
@@ -678,7 +659,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Tự động khởi tạo lại cột số thứ tự cho datagridview dòng tự do.
         /// </summary>
-        /// <param name="dgv">Datagridview nguồn.</param>
         public static void AutoNoColFree(this DataGridView dgv)
         {
             for (var i = 0; i < dgv.RowCount - 1; i++)
@@ -714,7 +694,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Tăng giảm hệ màu theo vector giá trị.
         /// </summary>
-        /// <param name="cl">Màu gốc.</param>
         /// <param name="val">Giá trị thêm.</param>
         /// <returns>Màu mới.</returns>
         public static Color UpDown(this Color cl, int val) => FromArgb((cl.R + val) % 256, (cl.G + val) % 256, (cl.B + val) % 256);
@@ -722,49 +701,42 @@ namespace YAN_Scripts
         /// <summary>
         /// Đảo nghịch màu.
         /// </summary>
-        /// <param name="cl">Màu gốc.</param>
         /// <returns>Màu mới.</returns>
         public static Color Invert(this Color cl) => FromArgb(cl.ToArgb() ^ 0xffffff);
 
         /// <summary>
         /// Viết thường cả chuỗi.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Chuỗi đã được chuyển.</returns>
         public static string LowerAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? str.ToLower() : str;
 
         /// <summary>
         /// Viết hoa cả chuỗi.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Chuỗi đã được chuyển.</returns>
         public static string UpperAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? str.ToUpper() : str;
 
         /// <summary>
         /// Viết hoa chữ đầu chuỗi.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Chuỗi đã được chuyển.</returns>
         public static string CapitalizeAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? str.First().ToString().ToUpper() + str.Substring(1) : str;
 
         /// <summary>
         /// Viết hoa chữ đầu chuỗi còn lại viết thường.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Chuỗi đã được chuyển.</returns>
         public static string CapitalizeAdvEx(this string str) => !string.IsNullOrWhiteSpace(str) ? str.First().ToString().ToUpper() + str.Substring(1).ToLower() : str;
 
         /// <summary>
         /// Viết hoa mỗi chữ đầu trong chuỗi.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Chuỗi đã được chuyển.</returns>
         public static string CapitalizeEachWordAdv(this string str) => !string.IsNullOrWhiteSpace(str) ? CurrentCulture.TextInfo.ToTitleCase(str) : str;
 
         /// <summary>
         /// Viết hoa mỗi chữ đầu trong chuỗi còn lại viết thường.
         /// </summary>
-        /// <param name="str">Chuỗi cần chuyển.</param>
         /// <returns>Chuỗi đã được chuyển.</returns>
         public static string CapitalizeEachWordAdvEx(this string str) => !string.IsNullOrWhiteSpace(str) ? CurrentCulture.TextInfo.ToTitleCase(str.ToLower()) : str;
         #endregion
@@ -773,7 +745,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Tắt tất cả process theo tên.
         /// </summary>
-        /// <param name="name">Tên app cần tắt.</param>
         public static void KillPrc(this string name)
         {
             if (GetProcessesByName(name).Count() > 0)
@@ -785,14 +756,12 @@ namespace YAN_Scripts
         /// <summary>
         /// Invoke text tới label khác thread.
         /// </summary>
-        /// <param name="lbl">Label cần invoke.</param>
         /// <param name="text">Text cần invoke.</param>
         public static void InvokeText(this Label lbl, string text) => lbl.Invoke((MethodInvoker)(() => lbl.Text = text));
 
         /// <summary>
         /// Invoke độ rộng tới panel khác thread.
         /// </summary>
-        /// <param name="pnl">Panel cần invoke.</param>
         /// <param name="w">Độ rộng cần invoke.</param>
         public static void InvokeW(this Panel pnl, int w) => pnl.Invoke((MethodInvoker)(() => pnl.Width = w));
         #endregion
@@ -935,7 +904,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Fade in form.
         /// </summary>
-        /// <param name="frm">Form áp dụng.</param>
         public static void FadeInFrm(this Form frm)
         {
             while (frm.Opacity < 1)
@@ -949,7 +917,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Fade out form.
         /// </summary>
-        /// <param name="frm">Form áp dụng.</param>
         public static void FadeOutFrm(this Form frm)
         {
             while (frm.Opacity > 0)
@@ -965,7 +932,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Get tất cả control con theo loại.
         /// </summary>
-        /// <param name="ctrl">Parent control.</param>
         /// <param name="type">Loại control cần get.</param>
         /// <returns>Control list.</returns>
         public static IEnumerable<Control> GetAllObjs(this Control ctrl, Type type)
@@ -977,7 +943,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Tạo list item cho combobox từ các file trong folder.
         /// </summary>
-        /// <param name="cmb">Combobox cần tạo list.</param>
         /// <param name="path">Folder path.</param>
         public static void GetItemListFromFilesInFolder(this YANComboBox cmb, string path)
         {
@@ -993,7 +958,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Scale picturebox theo chiều ngang.
         /// </summary>
-        /// <param name="pic">Picturebox mục tiêu.</param>
         public static void PicHorizontalScale(this PictureBox pic)
         {
             pic.SizeMode = Zoom;
@@ -1003,7 +967,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Scale picturebox theo chiều dọc.
         /// </summary>
-        /// <param name="pic">Picturebox mục tiêu.</param>
         public static void PicVerticalScale(this PictureBox pic)
         {
             pic.SizeMode = Zoom;
@@ -1013,7 +976,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Chạy timer.
         /// </summary>
-        /// <param name="tmr">Timer mục tiêu.</param>
         public static void TmrStartAdv(this Timer tmr)
         {
             if (!tmr.Enabled)
@@ -1025,7 +987,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Dừng timer.
         /// </summary>
-        /// <param name="tmr">Timer mục tiêu.</param>
         public static void TmrEndAdv(this Timer tmr)
         {
             if (tmr.Enabled)
@@ -1037,7 +998,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Highlight label link bằng tên control.
         /// </summary>
-        /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="typeName">Loại control.</param>
         /// <param name="cl">Màu highlight.</param>
         /// <param name="isBold">In đậm hoặc không.</param>
@@ -1213,7 +1173,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Hiện control với animation đồng bộ.
         /// </summary>
-        /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
         public static void ShowAnimator(this Control ctrl, AnimationType type, float speed)
@@ -1229,7 +1188,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Ẩn control với animation đồng bộ.
         /// </summary>
-        /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
         public static void HideAnimator(this Control ctrl, AnimationType type, float speed)
@@ -1245,7 +1203,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Hiện control với animation bất đồng bộ.
         /// </summary>
-        /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
         public static void ShowAnimatorAsync(this Control ctrl, AnimationType type, float speed)
@@ -1261,7 +1218,6 @@ namespace YAN_Scripts
         /// <summary>
         /// Ẩn control với animation bất đồng bộ.
         /// </summary>
-        /// <param name="ctrl">Control mục tiêu.</param>
         /// <param name="type">Loại hiệu ứng.</param>
         /// <param name="speed">Frame per milisecond.</param>
         public static void HideAnimatorAsync(this Control ctrl, AnimationType type, float speed)
