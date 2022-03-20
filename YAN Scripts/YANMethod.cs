@@ -512,18 +512,6 @@ namespace YAN_Scripts
         public static void AddNewRow(this DataTable dt) => dt.Rows.Add(dt.NewRow());
 
         /// <summary>
-        /// Datatable thêm dòng có sẵn value.
-        /// </summary>
-        /// <param name="drs">Những dòng được chọn.</param>
-        public static void AddRows(this DataTable dt, params DataRow[] drs)
-        {
-            foreach (var dr in drs)
-            {
-                dt.Rows.Add(dr.ItemArray);
-            }
-        }
-
-        /// <summary>
         /// Datatable thêm cột tại vị trí.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
@@ -551,13 +539,13 @@ namespace YAN_Scripts
         /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
         /// <param name="dtDest">Datatable nhận.</param>
-        public static void CopTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
+        public static void CopContentTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
 
         /// <summary>
         /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
         /// </summary>
         /// <param name="dtDest">Datatable nhận.</param>
-        public static void CopReverseTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDest, OverwriteChanges);
+        public static void CopReverseContentTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDest, OverwriteChanges);
 
         /// <summary>
         /// Đảo nghịch datatable.
@@ -586,21 +574,6 @@ namespace YAN_Scripts
                 frm.Show();
                 dgv.SelectAll();
                 SetText(dgv.GetClipboardContent().GetText());
-            }
-        }
-
-        /// <summary>
-        /// Gộp datatable.
-        /// </summary>
-        /// <param name="dtsSrc">Chuỗi datatable.</param>
-        public static void MergeEx(this DataTable dtDest, params DataTable[] dtsSrc)
-        {
-            foreach (var item in dtsSrc)
-            {
-                if (item != null)
-                {
-                    item.CopTo(dtDest);
-                }
             }
         }
 
