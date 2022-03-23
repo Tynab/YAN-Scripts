@@ -539,7 +539,13 @@ namespace YAN_Scripts
         /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
         /// <param name="dtDest">Datatable nhận.</param>
-        public static void CopContentTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
+        public static void CopContentToAdv(this DataTable dtSrc, DataTable dtDest)
+        {
+            if (dtSrc != null)
+            {
+                dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
+            }
+        }
 
         /// <summary>
         /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
