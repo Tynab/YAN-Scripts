@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YAN_Controls;
 using static AnimatorNS.AnimationType;
 using static System.Drawing.Color;
 using static System.Windows.Forms.Application;
 using static YAN_Scripts.YANConstant;
+using static System.Text.RegularExpressions.Regex;
 
 namespace YAN_Scripts
 {
@@ -359,6 +362,199 @@ namespace YAN_Scripts
         {
             var txt = (YANTextBox)sender;
             txt.Txt = txt.Txt.LowerAdv();
+        }
+
+        /// <summary>
+        /// Textbox auto định dạng địa chỉ.
+        /// </summary>
+        public static void TxtAdTrans_Leave(object sender, EventArgs e)
+        {
+            string[] list =
+            {
+                "xã ",
+                "Xã ",
+                "tỉnh ",
+                "Tỉnh ",
+                "khu phố ",
+                "Khu phố ",
+                "khu Phố ",
+                "Khu Phố ",
+                "thị trấn ",
+                "Thị trấn ",
+                "thị Trấn ",
+                "Thị Trấn ",
+                "phường ",
+                "Phường ",
+                "quận",
+                "Quận",
+                "thành phố ",
+                "Thành phố ",
+                "thành Phố ",
+                "Thành Phố ",
+                "chung cư",
+                "Chung cư",
+                "chung Cư",
+                "Chung Cư",
+                ", huyện ",
+                ", Huyện ",
+                ", hcm",
+                ", HCM",
+                ", Hcm",
+                ", hCm",
+                ", hcM",
+                ", HCm",
+                ", HcM",
+                ", hCM",
+                "x.",
+                "h.",
+                "t.",
+                "kp.",
+                "Kp.",
+                "kP.",
+                "tt.",
+                "Tt.",
+                "tT.",
+                "đ.",
+                "p.",
+                "q.",
+                "tp.",
+                "Tp.",
+                "tP.",
+                "x. ",
+                "h. ",
+                "t. ",
+                "kp. ",
+                "Kp. ",
+                "kP. ",
+                "tt. ",
+                "Tt. ",
+                "tT. ",
+                "đ. ",
+                "p. ",
+                "q. ",
+                "tp. ",
+                "Tp. ",
+                "tP. ",
+                " cc ",
+                " Cc ",
+                " cC ",
+                " - ",
+                "TPHCM",
+                "TP HCM",
+                "hcm",
+                "HCM",
+                "Hcm",
+                "hCm",
+                "hcM",
+                "HCm",
+                "HcM",
+                "hCM"
+            };
+            var keyReplace = new Dictionary<string, string>()
+            {
+                { "xã ", "X." },
+                { "Xã ", "X." },
+                { "tỉnh ", "T." },
+                { "Tỉnh ", "T." },
+                { "khu phố ", "KP." },
+                { "Khu phố ", "KP." },
+                { "khu Phố ", "KP." },
+                { "Khu Phố ", "KP." },
+                { "thị trấn ", "TT." },
+                { "Thị trấn ", "TT." },
+                { "thị Trấn ", "TT." },
+                { "Thị Trấn ", "TT." },
+                { "phường ", "P." },
+                { "Phường ", "P." },
+                { "quận", "Q." },
+                { "Quận", "Q." },
+                { "thành phố ", "TP." },
+                { "Thành phố ", "TP." },
+                { "thành Phố ", "TP." },
+                { "Thành Phố ", "TP." },
+                { "chung cư", "CC" },
+                { "Chung cư", "CC" },
+                { "chung Cư", "CC" },
+                { "Chung Cư", "CC" },
+                { ", huyện ", ", H." },
+                { ", Huyện ", ", H." },
+                { ", hcm", ", TP.Hồ Chí Minh" },
+                { ", HCM", ", TP.Hồ Chí Minh" },
+                { ", Hcm", ", TP.Hồ Chí Minh" },
+                { ", hCm", ", TP.Hồ Chí Minh" },
+                { ", hcM", ", TP.Hồ Chí Minh" },
+                { ", HCm", ", TP.Hồ Chí Minh" },
+                { ", HcM", ", TP.Hồ Chí Minh" },
+                { ", hCM", ", TP.Hồ Chí Minh" },
+                { "x.", "X." },
+                { "h.", "H." },
+                { "t.", "T." },
+                { "kp.", "KP." },
+                { "Kp.", "KP." },
+                { "kP.", "KP." },
+                { "tt.", "TT." },
+                { "Tt.", "TT." },
+                { "tT.", "TT." },
+                { "đ.", "" },
+                { "p.", "P." },
+                { "q.", "Q." },
+                { "tp.", "TP." },
+                { "Tp.", "TP." },
+                { "tP.", "TP." },
+                { "x. ", "X." },
+                { "h. ", "H." },
+                { "t. ", "T." },
+                { "kp. ", "KP." },
+                { "Kp. ", "KP." },
+                { "kP. ", "KP." },
+                { "tt. ", "TT." },
+                { "Tt. ", "TT." },
+                { "tT. ", "TT." },
+                { "đ. ", "" },
+                { "p. ", "P." },
+                { "q. ", "Q." },
+                { "tp. ", "TP." },
+                { "Tp. ", "TP." },
+                { "tP. ", "TP." },
+                { " cc ", " CC " },
+                { " Cc ", " CC " },
+                { " cC ", " CC " },
+                { " - ", ", " },
+                { "TPHCM", "TP.Hồ Chí Minh" },
+                { "TP HCM", "TP.Hồ Chí Minh" },
+                { "hcm", "Hồ Chí Minh" },
+                { "HCM", "Hồ Chí Minh" },
+                { "Hcm", "Hồ Chí Minh" },
+                { "hCm", "Hồ Chí Minh" },
+                { "hcM", "Hồ Chí Minh" },
+                { "HCm", "Hồ Chí Minh" },
+                { "HcM", "Hồ Chí Minh" },
+                { "hCM", "Hồ Chí Minh" }
+            };
+            var txt = (YANTextBox)sender;
+            var str = txt.Txt;
+            str = Replace(str, @"\,(?! |$)", ", ");
+            str = str.Replace("-", ", ");
+            foreach (var item in list)
+            {
+                str = str.Replace(item, keyReplace[item]);
+            }
+            var ikp = str.IndexOf(", KP") + 4;
+            if (ikp + 1 <= str.Length && str.Substring(ikp, 1) != ".")
+            {
+                str = Replace(str, @", KP(?! |$)", ", KP.");
+            }
+            var ip = str.IndexOf(", P") + 3;
+            if (ip + 1 <= str.Length && str.Substring(ip, 1) != ".")
+            {
+                str = Replace(str, @", P(?! |$)", ", P.");
+            }
+            var iq = str.IndexOf(", Q") + 3;
+            if (iq + 1 <= str.Length && str.Substring(iq, 1) != ".")
+            {
+                str = Replace(str, @", Q(?! |$)", ", Q.");
+            }
+            txt.Txt = str.Replace(". ", ".");
         }
         #endregion
 

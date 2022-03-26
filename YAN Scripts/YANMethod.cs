@@ -523,35 +523,35 @@ namespace YAN_Scripts
         /// Datatable cắt cột theo mẫu.
         /// </summary>
         /// <param name="dtSrc">Datatable mẫu.</param>
-        public static void SyncColTo(this DataTable dtDest, DataTable dtSrc)
+        public static void SyncColTo(this DataTable dtDst, DataTable dtSrc)
         {
-            while (dtDest.Columns.Count > dtSrc.Columns.Count)
+            while (dtDst.Columns.Count > dtSrc.Columns.Count)
             {
-                dtDest.Columns.RemoveAt(dtDest.Columns.Count - 1);
+                dtDst.Columns.RemoveAt(dtDst.Columns.Count - 1);
             }
-            while (dtDest.Columns.Count < dtSrc.Columns.Count)
+            while (dtDst.Columns.Count < dtSrc.Columns.Count)
             {
-                dtDest.AddColAt<string>(dtSrc.Columns[dtDest.Columns.Count].ColumnName, dtDest.Columns.Count);
+                dtDst.AddColAt<string>(dtSrc.Columns[dtDst.Columns.Count].ColumnName, dtDst.Columns.Count);
             }
         }
 
         /// <summary>
         /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
-        /// <param name="dtDest">Datatable nhận.</param>
-        public static void CopContentToAdv(this DataTable dtSrc, DataTable dtDest)
+        /// <param name="dtDst">Datatable nhận.</param>
+        public static void CopContentToAdv(this DataTable dtSrc, DataTable dtDst)
         {
             if (dtSrc != null)
             {
-                dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDest, OverwriteChanges);
+                dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDst, OverwriteChanges);
             }
         }
 
         /// <summary>
         /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
         /// </summary>
-        /// <param name="dtDest">Datatable nhận.</param>
-        public static void CopReverseContentTo(this DataTable dtSrc, DataTable dtDest) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDest, OverwriteChanges);
+        /// <param name="dtDst">Datatable nhận.</param>
+        public static void CopReverseContentTo(this DataTable dtSrc, DataTable dtDst) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDst, OverwriteChanges);
 
         /// <summary>
         /// Đảo nghịch datatable.
@@ -866,15 +866,15 @@ namespace YAN_Scripts
         /// Copy folder đến folder khác.
         /// </summary>
         /// <param name="srcDirName">Folder gốc.</param>
-        /// <param name="destDirName">Folder cần copy đến.</param>
+        /// <param name="dstDirName">Folder cần copy đến.</param>
         /// <param name="copSubDirs">Copy tất cả folder con hoặc không.</param>
-        public static void DirectoryCop(string srcDirName, string destDirName, bool copSubDirs)
+        public static void DirectoryCop(string srcDirName, string dstDirName, bool copSubDirs)
         {
-            CreateFolderAdv(destDirName);
-            ForEach(new DirectoryInfo(srcDirName).GetFiles(), file => file.CopyTo(Combine(destDirName, file.Name), false));
+            CreateFolderAdv(dstDirName);
+            ForEach(new DirectoryInfo(srcDirName).GetFiles(), file => file.CopyTo(Combine(dstDirName, file.Name), false));
             if (copSubDirs)
             {
-                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCop(subdir.FullName, Combine(destDirName, subdir.Name), copSubDirs));
+                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCop(subdir.FullName, Combine(dstDirName, subdir.Name), copSubDirs));
             }
         }
         #endregion
@@ -923,12 +923,15 @@ namespace YAN_Scripts
         /// Tạo list item cho combobox từ các file trong folder.
         /// </summary>
         /// <param name="path">Folder path.</param>
-        public static void GetItemListFromFilesInFolder(this YANComboBox cmb, string path)
+        public static void GetItemListFromFilesInFolderAdv(this YANComboBox cmb, string path)
         {
             cmb.Items.Clear();
-            foreach (var file in GetFiles(path))
+            if (Directory.Exists(path))
             {
-                cmb.Items.Add(GetFileNameWithoutExtension(file));
+                foreach (var file in GetFiles(path))
+                {
+                    cmb.Items.Add(GetFileNameWithoutExtension(file));
+                }
             }
         }
         #endregion
