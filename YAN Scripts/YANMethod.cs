@@ -940,7 +940,7 @@ namespace YAN_Scripts
         /// <summary>
         /// Scale picturebox theo chiều ngang.
         /// </summary>
-        public static void PicHorizontalScale(this PictureBox pic)
+        public static void HorizontalScale(this PictureBox pic)
         {
             pic.SizeMode = Zoom;
             pic.Image = pic.Image.Crop(new Rectangle(0, 0, pic.Image.Width, pic.Image.Width));
@@ -949,7 +949,7 @@ namespace YAN_Scripts
         /// <summary>
         /// Scale picturebox theo chiều dọc.
         /// </summary>
-        public static void PicVerticalScale(this PictureBox pic)
+        public static void VerticalScale(this PictureBox pic)
         {
             pic.SizeMode = Zoom;
             pic.Image = pic.Image.Crop(new Rectangle(0, 0, pic.Image.Height, pic.Image.Height));
