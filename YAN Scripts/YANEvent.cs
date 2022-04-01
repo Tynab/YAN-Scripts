@@ -533,28 +533,31 @@ namespace YAN_Scripts
             };
             var txt = (YANTextBox)sender;
             var str = txt.Txt;
-            str = Replace(str, @"\,(?! |$)", ", ");
-            str = str.Replace("-", ", ");
-            foreach (var item in list)
+            if (!string.IsNullOrWhiteSpace(str))
             {
-                str = str.Replace(item, keyReplace[item]);
+                str = Replace(str, @"\,(?! |$)", ", ");
+                str = str.Replace("-", ", ");
+                foreach (var item in list)
+                {
+                    str = str.Replace(item, keyReplace[item]);
+                }
+                var ikp = str.IndexOf(", KP") + 4;
+                if (ikp + 1 <= str.Length && str.Substring(ikp, 1) != ".")
+                {
+                    str = Replace(str, @", KP(?! |$)", ", KP.");
+                }
+                var ip = str.IndexOf(", P") + 3;
+                if (ip + 1 <= str.Length && str.Substring(ip, 1) != ".")
+                {
+                    str = Replace(str, @", P(?! |$)", ", P.");
+                }
+                var iq = str.IndexOf(", Q") + 3;
+                if (iq + 1 <= str.Length && str.Substring(iq, 1) != ".")
+                {
+                    str = Replace(str, @", Q(?! |$)", ", Q.");
+                }
+                txt.Txt = str.Replace(". ", ".");
             }
-            var ikp = str.IndexOf(", KP") + 4;
-            if (ikp + 1 <= str.Length && str.Substring(ikp, 1) != ".")
-            {
-                str = Replace(str, @", KP(?! |$)", ", KP.");
-            }
-            var ip = str.IndexOf(", P") + 3;
-            if (ip + 1 <= str.Length && str.Substring(ip, 1) != ".")
-            {
-                str = Replace(str, @", P(?! |$)", ", P.");
-            }
-            var iq = str.IndexOf(", Q") + 3;
-            if (iq + 1 <= str.Length && str.Substring(iq, 1) != ".")
-            {
-                str = Replace(str, @", Q(?! |$)", ", Q.");
-            }
-            txt.Txt = str.Replace(". ", ".");
         }
         #endregion
 
