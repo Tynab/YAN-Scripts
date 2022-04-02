@@ -986,8 +986,11 @@ namespace YAN_Scripts
         public static void HighLightLblLinkByCtrl(this Control ctrl, string typeName, Color cl, bool isBold)
         {
             var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(typeName.Length)}", true).FirstOrDefault();
-            lbl.ForeColor = cl;
-            lbl.Font = isBold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
+            if (!lbl.Equals(default))
+            {
+                lbl.ForeColor = cl;
+                lbl.Font = isBold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
+            }
         }
         #endregion
 

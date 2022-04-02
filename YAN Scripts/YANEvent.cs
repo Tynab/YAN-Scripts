@@ -592,7 +592,11 @@ namespace YAN_Scripts
         public static void RdoLinkCmb_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = (YANRadioButton)sender;
-            ((YANComboBox)rdo.FindForm().Controls.Find($"comboBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault()).Enabled = rdo.Checked;
+            var cmb = (YANComboBox)rdo.FindForm().Controls.Find($"comboBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault();
+            if (!cmb.Equals(default))
+            {
+                cmb.Enabled = rdo.Checked;
+            }
         }
 
         /// <summary>
@@ -601,7 +605,11 @@ namespace YAN_Scripts
         public static void RdoLinkGrp_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = (YANRadioButton)sender;
-            ((GroupBox)rdo.FindForm().Controls.Find($"groupBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault()).Enabled = rdo.Checked;
+            var grp = (GroupBox)rdo.FindForm().Controls.Find($"groupBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault();
+            if (!grp.Equals(default))
+            {
+                grp.Enabled = rdo.Checked;
+            }
         }
 
         /// <summary>
@@ -610,7 +618,11 @@ namespace YAN_Scripts
         public static void RdoLinkTxt_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = (YANRadioButton)sender;
-            ((YANTextBox)rdo.FindForm().Controls.Find($"textBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault()).Enabled = rdo.Checked;
+            var txt = (YANTextBox)rdo.FindForm().Controls.Find($"textBox{rdo.Name.Substring("radioButton".Length)}", true).FirstOrDefault();
+            if (!txt.Equals(default))
+            {
+                txt.Enabled = rdo.Checked;
+            }
         }
         #endregion
 
@@ -621,7 +633,11 @@ namespace YAN_Scripts
         public static void TgbtnLinkDp_CheckedChanged(object sender, EventArgs e)
         {
             var tgbtn = (YANToggleButton)sender;
-            ((YANDatePicker)tgbtn.FindForm().Controls.Find($"datePicker{tgbtn.Name.Substring("toggleButton".Length)}", true).FirstOrDefault()).Enabled = tgbtn.Checked;
+            var dp = (YANDatePicker)tgbtn.FindForm().Controls.Find($"datePicker{tgbtn.Name.Substring("toggleButton".Length)}", true).FirstOrDefault();
+            if (!dp.Equals(default))
+            {
+                dp.Enabled = tgbtn.Checked;
+            }
         }
 
         /// <summary>
@@ -630,7 +646,11 @@ namespace YAN_Scripts
         public static void TgbtnLinkCmb_CheckedChanged(object sender, EventArgs e)
         {
             var tgbtn = (YANToggleButton)sender;
-            ((YANComboBox)tgbtn.FindForm().Controls.Find($"comboBox{tgbtn.Name.Substring("toggleButton".Length)}", true).FirstOrDefault()).Enabled = tgbtn.Checked;
+            var cmb = (YANComboBox)tgbtn.FindForm().Controls.Find($"comboBox{tgbtn.Name.Substring("toggleButton".Length)}", true).FirstOrDefault();
+            if (!cmb.Equals(default))
+            {
+                cmb.Enabled = tgbtn.Checked;
+            }
         }
         #endregion
     }
