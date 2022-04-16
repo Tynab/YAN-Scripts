@@ -317,25 +317,15 @@ namespace YAN_Scripts
         /// Chuyển chuỗi giờ phút sang số giờ.
         /// </summary>
         /// <returns>Time hour.</returns>
-        public static double ParseFromHhmm(this string hm) => DtmTryParseFromHhmm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
+        public static double ParseHhFromHhmm(this string hm) => DtmTryParseFromHhmm(hm, out var dtm) ? (dtm - Today).TotalHours : 0;
 
         /// <summary>
-        /// Chuyển số phút sang chuỗi giờ phút.
+        /// Chuyển số giờ sang chuỗi giờ phút.
         /// </summary>
         /// <returns>Chuỗi giờ phút</returns>
-        public static string ToHhmmFromMm(this double mm)
+        public static string ToHhmmFromHh(this double hh)
         {
-            var timeSpan = FromHours(mm);
-            return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
-        }
-
-        /// <summary>
-        /// Chuyển số phút sang chuỗi giờ phút.
-        /// </summary>
-        /// <returns>Chuỗi giờ phút</returns>
-        public static string ToHhmmFromMm(this int mm)
-        {
-            var timeSpan = FromHours(mm);
+            var timeSpan = FromHours(hh);
             return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
         }
 
@@ -346,7 +336,7 @@ namespace YAN_Scripts
         public static DateTime DtmOnlAdv()
         {
             var dtm = Now;
-            if (CheckInternet())
+            if (IsInternetConnect())
             {
                 try
                 {
@@ -451,7 +441,7 @@ namespace YAN_Scripts
         /// Kiểm tra kết nối internet.
         /// </summary>
         /// <returns>Kết nổi hoặc không.</returns>
-        public static bool CheckInternet()
+        public static bool IsInternetConnect()
         {
             try
             {
@@ -518,6 +508,22 @@ namespace YAN_Scripts
         /// <param name="dcName">Tên cột cần thêm.</param>
         /// <param name="i">Vị trí cột cần thêm.</param>
         public static void AddColAt<T>(this DataTable dt, string dcName, int i) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(i);
+
+        /// <summary>
+        /// Contains chuỗi trong cột datatable.
+        /// </summary>
+        /// <param name="dcName">Tên cột cần tìm.</param>
+        /// <param name="str">Chuỗi cần tìm.</param>
+        /// <returns>Tìm thấy hoặc không.</returns>
+        public static bool ContainsCol(this DataTable dt, string dcName, string str) => dt.AsEnumerable().Any(row => str == row.Field<string>(dcName));
+
+        /// <summary>
+        /// Row index thông qua chuỗi trong cột datatable.
+        /// </summary>
+        /// <param name="dcName">Tên cột cần tìm.</param>
+        /// <param name="str">Chuỗi cần tìm.</param>
+        /// <returns>Row index.</returns>
+        public static int GetIndexRowByColSearch(this DataTable dt, string dcName, string str) => dt.AsEnumerable().Select(row => row.Field<string>(dcName)).ToList().FindIndex(col => col == str);
 
         /// <summary>
         /// Datatable cắt cột theo mẫu.
@@ -667,7 +673,7 @@ namespace YAN_Scripts
         public static bool CheckAppInstalled(string name)
         {
             var path = @"Microsoft\Windows\CurrentVersion\Uninstall";
-            return CheckAppInList(name, $"SOFTWARE\\{path}") || CheckAppInList(name, $"SOFTWARE\\Wow6432Node\\{path}");
+            return CheckAppInList(name, $@"SOFTWARE\{path}") || CheckAppInList(name, $@"SOFTWARE\Wow6432Node\{path}");
         }
 
         /// <summary>
@@ -806,7 +812,7 @@ namespace YAN_Scripts
                 using (var gfxScreenshot = FromImage(bmpScreenshot))
                 {
                     gfxScreenshot.CopyFromScreen(PrimaryScreen.Bounds.X, PrimaryScreen.Bounds.Y, 0, 0, PrimaryScreen.Bounds.Size, SourceCopy);
-                    ad = $"{path}\\{name}.jpg";
+                    ad = $@"{path}\{name}.jpg";
                     bmpScreenshot.Save(ad, Jpeg);
                 }
             }
