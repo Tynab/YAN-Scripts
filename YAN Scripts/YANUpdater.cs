@@ -7,10 +7,10 @@ namespace YAN_Scripts
     public class YANUpdater
     {
         #region Fields
-        public Panel _pnlPrg_;
-        public Label _lblCapacity_;
-        public Label _lblPercent_;
-        private FormUpdater _frmUpdater;
+        public Panel _pnl_Prg_;
+        public Label _lbl_Capacity_;
+        public Label _lbl_Percent_;
+        private FormUpdater _frm_Updater;
         private Thread _thread;
         #endregion
 
@@ -18,11 +18,11 @@ namespace YAN_Scripts
         //loading process
         private void LoadingPrc(object parent)
         {
-            _frmUpdater = new FormUpdater();
-            _pnlPrg_ = _frmUpdater.panelProgressBar;
-            _lblCapacity_ = _frmUpdater.labelCapacity;
-            _lblPercent_ = _frmUpdater.labelPercent;
-            _frmUpdater.ShowDialog();
+            _frm_Updater = new FormUpdater();
+            _pnl_Prg_ = _frm_Updater.panelProgressBar;
+            _lbl_Capacity_ = _frm_Updater.labelCapacity;
+            _lbl_Percent_ = _frm_Updater.labelPercent;
+            _frm_Updater.ShowDialog();
         }
 
         /// <summary>
@@ -39,10 +39,10 @@ namespace YAN_Scripts
         /// </summary>
         public void OffLoader()
         {
-            if (_frmUpdater != null)
+            if (_frm_Updater != null)
             {
-                _frmUpdater.BeginInvoke(new ThreadStart(_frmUpdater.FrmCloseToken));
-                _frmUpdater = null;
+                _frm_Updater.BeginInvoke(new ThreadStart(_frm_Updater.FrmCloseToken));
+                _frm_Updater = null;
                 _thread = null;
             }
         }

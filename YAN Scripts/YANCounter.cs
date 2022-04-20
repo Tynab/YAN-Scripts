@@ -7,20 +7,20 @@ namespace YAN_Scripts
     public class YANCounter
     {
         #region Fields
-        public Label _lblPercent_;
-        private FormCounter _frmCounter;
+        public Label _lbl_Percent_;
+        private FormCounter _frm_Counter;
         private Thread _thread;
         private int _rad;
-        private bool _isTop;
+        private bool _is_Top;
         #endregion
 
         #region Methods
         //loading process
         private void LoadingPrc(object parent)
         {
-            _frmCounter = new FormCounter((Form)parent, _rad, _isTop);
-            _lblPercent_ = _frmCounter.labelPercent;
-            _frmCounter.ShowDialog();
+            _frm_Counter = new FormCounter((Form)parent, _rad, _is_Top);
+            _lbl_Percent_ = _frm_Counter.labelPercent;
+            _frm_Counter.ShowDialog();
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace YAN_Scripts
             _thread = new Thread(new ParameterizedThreadStart(LoadingPrc));
             _thread.Start(frm);
             _rad = cor;
-            _isTop = onTop;
+            _is_Top = onTop;
         }
 
         /// <summary>
@@ -42,10 +42,10 @@ namespace YAN_Scripts
         /// </summary>
         public void OffLoader()
         {
-            if (_frmCounter != null)
+            if (_frm_Counter != null)
             {
-                _frmCounter.BeginInvoke(new ThreadStart(_frmCounter.FrmCloseToken));
-                _frmCounter = null;
+                _frm_Counter.BeginInvoke(new ThreadStart(_frm_Counter.FrmCloseToken));
+                _frm_Counter = null;
                 _thread = null;
             }
         }

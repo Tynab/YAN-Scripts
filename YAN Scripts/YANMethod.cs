@@ -9,12 +9,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using YAN_Controls;
 using static Microsoft.Win32.Registry;
+using static System.Array;
 using static System.BitConverter;
+using static System.Convert;
 using static System.Data.LoadOption;
 using static System.DateTime;
 using static System.DateTimeKind;
@@ -107,9 +110,9 @@ namespace YAN_Scripts
         }
 
         //check app installer trong app list
-        private static bool CheckAppInList(string name, string path)
+        private static bool IsAppInList(string name, string path)
         {
-            var check = false;
+            var is_Success = false;
             var key = LocalMachine.OpenSubKey(path);
             if (key != null)
             {
@@ -118,13 +121,53 @@ namespace YAN_Scripts
                     var displayName = (string)subkey.GetValue("DisplayName");
                     if (displayName != null && displayName.Contains(name))
                     {
-                        check = true;
+                        is_Success = true;
                         state.Stop();
                     }
                 });
                 key.Close();
             }
-            return check;
+            return is_Success;
+        }
+        #endregion
+
+        #region Hash
+        /// <summary>
+        /// Hash password.
+        /// </summary>
+        /// <param name="pass">Password input.</param>
+        /// <returns>Password đã hash.</returns>
+        public static string HashPass(string pass)
+        {
+            byte[] salt;
+            var hashBytes = new byte[36];
+            new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
+            Copy(salt, 0, hashBytes, 0, 16);
+            Copy(new Rfc2898DeriveBytes(pass, salt, 100000).GetBytes(20), 0, hashBytes, 16, 20);
+            return ToBase64String(hashBytes);
+        }
+
+        /// <summary>
+        /// Verify password.
+        /// </summary>
+        /// <param name="code">Password trong database.</param>
+        /// <param name="pass">Password input.</param>
+        /// <returns>Xác định password đúng sai.</returns>
+        public static bool IsVerifyPass(this string code, string pass)
+        {
+            var is_Success = true;
+            var salt = new byte[16];
+            var hashBytes = FromBase64String(code);
+            Copy(hashBytes, 0, salt, 0, 16);
+            var hash = new Rfc2898DeriveBytes(pass, salt, 100000).GetBytes(20); //pin out loop
+            for (var i = 0; i < 20; i++)
+            {
+                if (hashBytes[i + 16] != hash[i])
+                {
+                    is_Success = false;
+                }
+            }
+            return is_Success;
         }
         #endregion
 
@@ -139,17 +182,17 @@ namespace YAN_Scripts
 
         //hiện window
         [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private static extern bool IsWindow(IntPtr hWnd, int nCmdShow);
 
         /// <summary>
         /// Ẩn window console.
         /// </summary>
-        public static void HideConsole() => ShowWindow(GetConsoleWindow(), SW_HIDE);
+        public static void HideConsole() => IsWindow(GetConsoleWindow(), SW_HIDE);
 
         /// <summary>
         /// Hiện window console.
         /// </summary>
-        public static void ShowConsole() => ShowWindow(GetConsoleWindow(), SW_SHOW);
+        public static void ShowConsole() => IsWindow(GetConsoleWindow(), SW_SHOW);
         #endregion
 
         #region Vietnamese Format
@@ -157,7 +200,7 @@ namespace YAN_Scripts
         private static IEnumerable<string> Chunked(this string str, int chunkSize) => Range(0, str.Length / chunkSize).Select(i => str.Substring(i * chunkSize, chunkSize));
 
         //fần ngìn
-        private static bool ShouldShowZeroHundred(this string[] groups) => groups.Reverse().TakeWhile(it => it == "000").Count() < groups.Count() - 1;
+        private static bool IsShowZeroHundred(this string[] groups) => groups.Reverse().TakeWhile(it => it == "000").Count() < groups.Count() - 1;
 
         //zải cấu truc (private của function number to vietnamese words)
         internal static void Deconstruct<T>(this IReadOnlyList<T> items, out T t0, out T t1, out T t2)
@@ -191,13 +234,13 @@ namespace YAN_Scripts
         }
 
         //bộ 3
-        private static string ReadTriple(string triple, bool showZeroHundred)
+        private static string ReadTriple(string triple, bool is_ShowZeroHundred)
         {
             var (a, b, c) = triple.Select(ch => int.Parse(ch.ToString())).ToArray();
             return a switch
             {
                 0 when b == 0 && c == 0 => "",
-                0 when showZeroHundred => "không trăm " + ReadPair(b, c),
+                0 when is_ShowZeroHundred => "không trăm " + ReadPair(b, c),
                 0 when b == 0 => Digits[c],
                 0 => ReadPair(b, c),
                 _ => Digits[a] + " trăm " + ReadPair(b, c)
@@ -227,7 +270,7 @@ namespace YAN_Scripts
                 {
                     i++;
                 }
-                var readTriple = ReadTriple(e, groups.ShouldShowZeroHundred() && i > 0);
+                var readTriple = ReadTriple(e, groups.IsShowZeroHundred() && i > 0);
                 var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - i) ?? "");
                 return $"{acc} {readTriple} {multipleThousand} ";
             });
@@ -360,10 +403,10 @@ namespace YAN_Scripts
         /// <summary>
         /// Tính số tháng giữa 2 ngày.
         /// </summary>
-        /// <param name="dtmSt">Ngày thứ nhất.</param>
-        /// <param name="dtmNd">Ngày thứ 2.</param>
+        /// <param name="dtm1">Ngày thứ nhất.</param>
+        /// <param name="dtm2">Ngày thứ 2.</param>
         /// <returns>Số tháng được tính.</returns>
-        public static int DtmTotalWw(DateTime dtmSt, DateTime dtmNd) => dtmNd > dtmSt ? (dtmNd.Year - dtmSt.Year) * 12 + dtmNd.Month - dtmSt.Month : (dtmSt.Year - dtmNd.Year) * 12 + dtmSt.Month - dtmNd.Month;
+        public static int DtmTotalWw(DateTime dtm1, DateTime dtm2) => dtm2 > dtm1 ? (dtm2.Year - dtm1.Year) * 12 + dtm2.Month - dtm1.Month : (dtm1.Year - dtm2.Year) * 12 + dtm1.Month - dtm2.Month;
         #endregion
 
         #region Math
@@ -471,29 +514,29 @@ namespace YAN_Scripts
         /// <summary>
         /// Tìm vị trí dòng trong datatable chứa ô có chuỗi cần tìm.
         /// </summary>
-        /// <param name="dcName">Tên cột tìm kiếm.</param>
+        /// <param name="colName">Tên cột tìm kiếm.</param>
         /// <param name="str">Chuỗi cần tìm.</param>
         /// <returns>Vị trí dòng trong datatable.</returns>
-        public static int SearchRowIndexWithText(this DataTable dt, string dcName, string str) => dt.Rows.IndexOf(dt.Select($"{dcName} = '{str}'")[0]);
+        public static int SearchRowIndexWithText(this DataTable dt, string colName, string str) => dt.Rows.IndexOf(dt.Select($"{colName} = '{str}'")[0]);
 
         /// <summary>
         /// Sort datatable theo cột số từ nhỏ đến lớn (không an toàn).
         /// </summary>
-        /// <param name="dcName">Tên cột sort.</param>
+        /// <param name="colName">Tên cột sort.</param>
         /// <returns>Datatable mới đã sort.</returns>
-        public static DataTable SortByNumCol(this DataTable dt, string dcName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[dcName].ToString())).Select(x => x).CopyToDataTable();
+        public static DataTable SortByNumCol(this DataTable dt, string colName) => dt.AsEnumerable().OrderBy(x => int.Parse(x[colName].ToString())).Select(x => x).CopyToDataTable();
 
         /// <summary>
         /// Filter datatable theo giá trị.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
-        /// <param name="dcName">Tên cột filter.</param>
+        /// <param name="dcolame">Tên cột filter.</param>
         /// <param name="val">Giá trị filter.</param>
         /// <returns>Datatable mới đã filter.</returns>
-        public static DataTable Filter<T>(this DataTable dt, string dcName, T val)
+        public static DataTable Filter<T>(this DataTable dt, string dcolame, T val)
         {
             dynamic x = val;
-            return dt.AsEnumerable().Where(row => row.Field<T>(dcName) == x).CopyToDataTable();
+            return dt.AsEnumerable().Where(row => row.Field<T>(dcolame) == x).CopyToDataTable();
         }
 
         /// <summary>
@@ -505,59 +548,59 @@ namespace YAN_Scripts
         /// Datatable thêm cột tại vị trí.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu.</typeparam>
-        /// <param name="dcName">Tên cột cần thêm.</param>
-        /// <param name="i">Vị trí cột cần thêm.</param>
-        public static void AddColAt<T>(this DataTable dt, string dcName, int i) => dt.Columns.Add(dcName, typeof(T)).SetOrdinal(i);
+        /// <param name="colName">Tên cột cần thêm.</param>
+        /// <param name="index">Vị trí cột cần thêm.</param>
+        public static void AddColAt<T>(this DataTable dt, string colName, int index) => dt.Columns.Add(colName, typeof(T)).SetOrdinal(index);
 
         /// <summary>
         /// Contains chuỗi trong cột datatable.
         /// </summary>
-        /// <param name="dcName">Tên cột cần tìm.</param>
+        /// <param name="colName">Tên cột cần tìm.</param>
         /// <param name="str">Chuỗi cần tìm.</param>
         /// <returns>Tìm thấy hoặc không.</returns>
-        public static bool ContainsCol(this DataTable dt, string dcName, string str) => dt.AsEnumerable().Any(row => str == row.Field<string>(dcName));
+        public static bool IsContainsCol(this DataTable dt, string colName, string str) => dt.AsEnumerable().Any(row => str == row.Field<string>(colName));
 
         /// <summary>
         /// Row index thông qua chuỗi trong cột datatable.
         /// </summary>
-        /// <param name="dcName">Tên cột cần tìm.</param>
+        /// <param name="colName">Tên cột cần tìm.</param>
         /// <param name="str">Chuỗi cần tìm.</param>
         /// <returns>Row index.</returns>
-        public static int GetIndexRowByColSearch(this DataTable dt, string dcName, string str) => dt.AsEnumerable().Select(row => row.Field<string>(dcName)).ToList().FindIndex(col => col == str);
+        public static int GetIndexRowByColSearch(this DataTable dt, string colName, string str) => dt.AsEnumerable().Select(row => row.Field<string>(colName)).ToList().FindIndex(col => col == str);
 
         /// <summary>
         /// Datatable cắt cột theo mẫu.
         /// </summary>
-        /// <param name="dtSrc">Datatable mẫu.</param>
-        public static void SyncColTo(this DataTable dtDst, DataTable dtSrc)
+        /// <param name="dt_Src">Datatable mẫu.</param>
+        public static void SyncColTo(this DataTable dt_Dst, DataTable dt_Src)
         {
-            while (dtDst.Columns.Count > dtSrc.Columns.Count)
+            while (dt_Dst.Columns.Count > dt_Src.Columns.Count)
             {
-                dtDst.Columns.RemoveAt(dtDst.Columns.Count - 1);
+                dt_Dst.Columns.RemoveAt(dt_Dst.Columns.Count - 1);
             }
-            while (dtDst.Columns.Count < dtSrc.Columns.Count)
+            while (dt_Dst.Columns.Count < dt_Src.Columns.Count)
             {
-                dtDst.AddColAt<string>(dtSrc.Columns[dtDst.Columns.Count].ColumnName, dtDst.Columns.Count);
+                dt_Dst.AddColAt<string>(dt_Src.Columns[dt_Dst.Columns.Count].ColumnName, dt_Dst.Columns.Count);
             }
         }
 
         /// <summary>
         /// Chép dữ liệu từ datatable này sang datatable khác.
         /// </summary>
-        /// <param name="dtDst">Datatable nhận.</param>
-        public static void CopContentToAdv(this DataTable dtSrc, DataTable dtDst)
+        /// <param name="dt_Dst">Datatable nhận.</param>
+        public static void CopContentToAdv(this DataTable dt_Src, DataTable dt_Dst)
         {
-            if (dtSrc != null)
+            if (dt_Src != null)
             {
-                dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).CopyToDataTable(dtDst, OverwriteChanges);
+                dt_Src.AsEnumerable().Take(dt_Src.Rows.Count).CopyToDataTable(dt_Dst, OverwriteChanges);
             }
         }
 
         /// <summary>
         /// Chép dữ liệu từ datatable này đảo nghịch sang datatable khác.
         /// </summary>
-        /// <param name="dtDst">Datatable nhận.</param>
-        public static void CopReverseContentTo(this DataTable dtSrc, DataTable dtDst) => dtSrc.AsEnumerable().Take(dtSrc.Rows.Count).Reverse().CopyToDataTable(dtDst, OverwriteChanges);
+        /// <param name="dt_Dst">Datatable nhận.</param>
+        public static void CopReverseContentTo(this DataTable dt_Src, DataTable dt_Dst) => dt_Src.AsEnumerable().Take(dt_Src.Rows.Count).Reverse().CopyToDataTable(dt_Dst, OverwriteChanges);
 
         /// <summary>
         /// Đảo nghịch datatable.
@@ -570,23 +613,22 @@ namespace YAN_Scripts
         /// </summary>
         public static void ToClipboard(this DataTable dt)
         {
-            using (var frm = new Form
+            var frm = new Form
             {
                 Opacity = 0,
                 ShowInTaskbar = false
-            })
+            };
+            var dgv = new DataGridView
             {
-                var dgv = new DataGridView
-                {
-                    ClipboardCopyMode = EnableWithoutHeaderText,
-                    AllowUserToAddRows = false,
-                    DataSource = dt
-                };
-                frm.Controls.Add(dgv);
-                frm.Show();
-                dgv.SelectAll();
-                SetText(dgv.GetClipboardContent().GetText());
-            }
+                ClipboardCopyMode = EnableWithoutHeaderText,
+                AllowUserToAddRows = false,
+                DataSource = dt
+            };
+            frm.Controls.Add(dgv);
+            frm.Show();
+            dgv.SelectAll();
+            SetText(dgv.GetClipboardContent().GetText());
+            frm.Dispose();
         }
 
         /// <summary>
@@ -657,11 +699,11 @@ namespace YAN_Scripts
         /// <summary>
         /// Đồng hồ hẹn giờ cho windows.
         /// </summary>
-        /// <param name="act">Hành động áp dụng.</param>
+        /// <param name="action">Hành động áp dụng.</param>
         /// /// <param name="ss">Số giây đếm ngược.</param>
-        public static void CountdownWin(CountdownAction act, int ss)
+        public static void CountdownWin(CountdownAction action, int ss)
         {
-            var cmt = act == ShutDown ? "s" : "r";
+            var cmt = action == ShutDown ? "s" : "r";
             Start("shutdown.exe", $"-{cmt} -t {ss}");
         }
 
@@ -670,10 +712,10 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="name">Tên app cần tìm.</param>
         /// <returns>Đã cài hoặc chưa,</returns>
-        public static bool CheckAppInstalled(string name)
+        public static bool IsAppInstalled(string name)
         {
             var path = @"Microsoft\Windows\CurrentVersion\Uninstall";
-            return CheckAppInList(name, $@"SOFTWARE\{path}") || CheckAppInList(name, $@"SOFTWARE\Wow6432Node\{path}");
+            return IsAppInList(name, $@"SOFTWARE\{path}") || IsAppInList(name, $@"SOFTWARE\Wow6432Node\{path}");
         }
 
         /// <summary>
@@ -873,14 +915,14 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="srcDirName">Folder gốc.</param>
         /// <param name="dstDirName">Folder cần copy đến.</param>
-        /// <param name="copSubDirs">Copy tất cả folder con hoặc không.</param>
-        public static void DirectoryCop(string srcDirName, string dstDirName, bool copSubDirs)
+        /// <param name="is_SubCop">Copy tất cả folder con hoặc không.</param>
+        public static void DirectoryCop(string srcDirName, string dstDirName, bool is_SubCop)
         {
             CreateFolderAdv(dstDirName);
             ForEach(new DirectoryInfo(srcDirName).GetFiles(), file => file.CopyTo(Combine(dstDirName, file.Name), false));
-            if (copSubDirs)
+            if (is_SubCop)
             {
-                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCop(subdir.FullName, Combine(dstDirName, subdir.Name), copSubDirs));
+                ForEach(new DirectoryInfo(srcDirName).GetDirectories(), subdir => DirectoryCop(subdir.FullName, Combine(dstDirName, subdir.Name), is_SubCop));
             }
         }
         #endregion
@@ -988,14 +1030,14 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="typeName">Loại control.</param>
         /// <param name="cl">Màu highlight.</param>
-        /// <param name="isBold">In đậm hoặc không.</param>
-        public static void HighLightLblLinkByCtrl(this Control ctrl, string typeName, Color cl, bool isBold)
+        /// <param name="is_Bold">In đậm hoặc không.</param>
+        public static void HighLightLblLinkByCtrl(this Control ctrl, string typeName, Color cl, bool is_Bold)
         {
             var lbl = (Label)ctrl.FindForm().Controls.Find($"label{ctrl.Name.Substring(typeName.Length)}", true).FirstOrDefault();
             if (!lbl.Equals(default))
             {
                 lbl.ForeColor = cl;
-                lbl.Font = isBold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
+                lbl.Font = is_Bold ? new Font(lbl.Font, Bold) : new Font(lbl.Font, Regular);
             }
         }
         #endregion

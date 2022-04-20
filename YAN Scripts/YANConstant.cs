@@ -8,13 +8,13 @@ namespace YAN_Scripts
     public class YANConstant
     {
         #region Variable
-        public static Font _fntTitVn_ = new Font("Tahoma", 10);
-        public static Font _fntTitJp_ = new Font("Yu Gothic", 11);
-        public static Font _fntCapVn_ = new Font("Verdana", 9);
-        public static Font _fntCapJp_ = new Font("Meiryo", 11);
-        public static Font _fntTextVn_ = new Font("Segoe UI Light", 10);
-        public static Font _fntTextJp_ = new Font("Meiryo", 10);
-        public static readonly Color _clHeaderXl_ = FromArgb(0, 122, 204);
+        public static Font _fnt_TitVn_ = new Font("Tahoma", 10);
+        public static Font _fnt_TitJp_ = new Font("Yu Gothic", 11);
+        public static Font _fnt_CapVn_ = new Font("Verdana", 9);
+        public static Font _fnt_CapJp_ = new Font("Meiryo", 11);
+        public static Font _fnt_TextVn_ = new Font("Segoe UI Light", 10);
+        public static Font _fnt_TextJp_ = new Font("Meiryo", 10);
+        public static readonly Color _cl_HeaderXl_ = FromArgb(0, 122, 204);
         public const string _trueVn_ = "Có";
         public const string _falseVn_ = "Không";
         public const string _prcXl_ = "excel";

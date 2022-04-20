@@ -17,7 +17,7 @@ namespace YAN_Scripts
     {
         #region Form Move
         //fields
-        private static bool _moveFrm;
+        private static bool _is_move;
         private static Point _lastLoc;
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace YAN_Scripts
             //sound
             _sound_Change_.Play();
             //action
-            _moveFrm = true;
+            _is_move = true;
             _lastLoc = e.Location;
             ((Control)sender).FindForm().Opacity = 0.7;
         }
@@ -38,7 +38,7 @@ namespace YAN_Scripts
         /// </summary>
         public static void MoveFrm_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_moveFrm)
+            if (_is_move)
             {
                 var frm = ((Control)sender).FindForm();
                 frm.Location = new Point(frm.Location.X - _lastLoc.X + e.X, frm.Location.Y - _lastLoc.Y + e.Y);
@@ -51,7 +51,7 @@ namespace YAN_Scripts
         /// </summary>
         public static void MoveFrm_MouseUp(object sender, MouseEventArgs e)
         {
-            _moveFrm = false;
+            _is_move = false;
             ((Control)sender).FindForm().Opacity = 1;
         }
         #endregion
@@ -369,7 +369,7 @@ namespace YAN_Scripts
         /// </summary>
         public static void TxtAdTrans_Leave(object sender, EventArgs e)
         {
-            string[] list =
+            string[] arr =
             {
                 "xã ",
                 "Xã ",
@@ -450,7 +450,7 @@ namespace YAN_Scripts
                 "HcM",
                 "hCM"
             };
-            var keyReplace = new Dictionary<string, string>()
+            var key_Replace = new Dictionary<string, string>()
             {
                 { "xã ", "X." },
                 { "Xã ", "X." },
@@ -537,9 +537,9 @@ namespace YAN_Scripts
             {
                 str = Replace(str, @"\,(?! |$)", ", ");
                 str = str.Replace("-", ", ");
-                foreach (var item in list)
+                foreach (var item in arr)
                 {
-                    str = str.Replace(item, keyReplace[item]);
+                    str = str.Replace(item, key_Replace[item]);
                 }
                 var ikp = str.IndexOf(", KP") + 4;
                 if (ikp + 1 <= str.Length && str.Substring(ikp, 1) != ".")
