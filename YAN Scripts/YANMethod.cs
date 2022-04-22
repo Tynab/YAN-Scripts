@@ -131,7 +131,7 @@ namespace YAN_Scripts
         }
         #endregion
 
-        #region Hash
+        #region Protect
         /// <summary>
         /// Hash password.
         /// </summary>
@@ -182,17 +182,17 @@ namespace YAN_Scripts
 
         //hiện window
         [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd, int nCmdShow);
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         /// <summary>
         /// Ẩn window console.
         /// </summary>
-        public static void HideConsole() => IsWindow(GetConsoleWindow(), SW_HIDE);
+        public static void HideConsole() => ShowWindow(GetConsoleWindow(), SW_HIDE);
 
         /// <summary>
         /// Hiện window console.
         /// </summary>
-        public static void ShowConsole() => IsWindow(GetConsoleWindow(), SW_SHOW);
+        public static void ShowConsole() => ShowWindow(GetConsoleWindow(), SW_SHOW);
         #endregion
 
         #region Vietnamese Format

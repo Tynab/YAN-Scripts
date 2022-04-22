@@ -25,7 +25,6 @@ namespace YAN_Scripts
         public const string _formatTimeVn_ = "HH:mm:ss";
         public const string _xlFormatText_ = "@";
         public const string _xlFormatNum_ = "#,##0";
-        public const string _codeFormatText = "Unicode Text";
         public const string _fontDoc_ = "Times New Roman";
         public const float _animatorSpeed_ = 0.02f;
         public const int _timeAnimate_ = 500;
