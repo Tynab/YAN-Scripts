@@ -44,6 +44,7 @@ using static System.Net.Sockets.SocketType;
 using static System.Net.WebRequest;
 using static System.Reflection.BindingFlags;
 using static System.Threading.Tasks.Parallel;
+using static System.Threading.Thread;
 using static System.TimeSpan;
 using static System.Windows.Forms.Clipboard;
 using static System.Windows.Forms.Cursor;
@@ -488,7 +489,7 @@ namespace YAN_Scripts
         {
             try
             {
-                var objWebReq = Create(new Uri("https://www.google.com/"));
+                var objWebReq = Create(new Uri("https://pastebin.com/"));
                 objWebReq.Timeout = _timeOut_;
                 using (var objResp = objWebReq.GetResponse())
                 {
@@ -776,7 +777,11 @@ namespace YAN_Scripts
         {
             if (GetProcessesByName(name).Count() > 0)
             {
-                ForEach(GetProcessesByName(name), prc => prc.Kill());
+                foreach (var prc in GetProcessesByName(name))
+                {
+                    prc.Kill();
+                    Sleep(100);
+                }
             }
         }
 
