@@ -26,13 +26,13 @@ namespace YAN_Scripts
         /// </summary>
         /// <param name="frm">Parent form.</param>
         /// <param name="cor">Góc bo của form.</param>
-        /// <param name="onTop">Hiển thị đè hoặc không.</param>
-        public void OnLoader(Form frm, int cor, bool onTop)
+        /// <param name="is_Top">Hiển thị đè hoặc không.</param>
+        public void OnLoader(Form frm, int cor, bool is_Top)
         {
             _thread = new Thread(new ParameterizedThreadStart(LoadingPrc));
             _thread.Start(frm);
             _rad = cor;
-            _is_Top = onTop;
+            _is_Top = is_Top;
         }
 
         /// <summary>

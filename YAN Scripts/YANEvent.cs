@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YAN_Controls;
 using static AnimatorNS.AnimationType;
 using static System.Drawing.Color;
+using static System.Text.RegularExpressions.Regex;
 using static System.Windows.Forms.Application;
 using static YAN_Scripts.YANConstant;
-using static System.Text.RegularExpressions.Regex;
 
 namespace YAN_Scripts
 {

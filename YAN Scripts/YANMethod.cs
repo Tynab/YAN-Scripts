@@ -264,7 +264,7 @@ namespace YAN_Scripts
             var str = num.ToString();
             var groups = (ZeroLeftPadding[str.Length % 3] + str).Chunked(3).ToArray();
             var i = -1;
-            var rawResult = groups.Aggregate("", (acc, e) =>
+            var rawRes = groups.Aggregate("", (acc, e) =>
             {
                 checked
                 {
@@ -274,7 +274,7 @@ namespace YAN_Scripts
                 var multipleThousand = string.IsNullOrWhiteSpace(readTriple) ? "" : (MultipleThousand.ElementAtOrDefault(groups.Length - 1 - i) ?? "");
                 return $"{acc} {readTriple} {multipleThousand} ";
             });
-            return Regex.Replace(rawResult, "\\s+", " ").Trim().CapitalizeAdvEx(); //replace white space with a specified character
+            return Regex.Replace(rawRes, "\\s+", " ").Trim().CapitalizeAdvEx(); //replace white space with a specified character
         }
 
         /// <summary>
