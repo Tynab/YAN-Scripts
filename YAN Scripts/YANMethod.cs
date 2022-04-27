@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -38,10 +39,10 @@ using static System.IO.Path;
 using static System.Linq.Enumerable;
 using static System.Math;
 using static System.Net.Dns;
+using static System.Net.NetworkInformation.IPStatus;
 using static System.Net.Sockets.AddressFamily;
 using static System.Net.Sockets.ProtocolType;
 using static System.Net.Sockets.SocketType;
-using static System.Net.WebRequest;
 using static System.Reflection.BindingFlags;
 using static System.Threading.Tasks.Parallel;
 using static System.Threading.Thread;
@@ -489,15 +490,10 @@ namespace YAN_Scripts
         {
             try
             {
-                var objWebReq = Create(new Uri("https://pastebin.com/"));
-                objWebReq.Timeout = _timeOut_;
-                using (var objResp = objWebReq.GetResponse())
-                {
-                    objResp.Close();
-                }
-                return true;
+                var buffer = new byte[32];
+                return new Ping().Send("google.com", _timeOut_, buffer, new PingOptions()).Status == Success;
             }
-            catch
+            catch (Exception)
             {
                 return false;
             }
