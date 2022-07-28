@@ -1,5 +1,5 @@
 # TÍCH HỢP CÁC PHƯƠNG THỨC ỨNG DỤNG
-Hỗ trợ các phương thức có sẵn
+Hỗ trợ các phương thức có sẵn.
 ## HÌNH ẢNH DEMO
 ![HRM](https://media-exp1.licdn.com/dms/image/C4D22AQHNxMO1Xuk_zQ/feedshare-shrink_800/0/1652834008818?e=1661990400&v=beta&t=2Vd4ipXStUVHWWyhgO22MN2Z-bf5c7muojlx1Zkx1Bk)
 ## CODE DEMO
