@@ -708,7 +708,7 @@ namespace YAN_Scripts
         /// Kiểm tra app đã cài đặt bằng tên.
         /// </summary>
         /// <param name="name">Tên app cần tìm.</param>
-        /// <returns>Đã cài hoặc chưa,</returns>
+        /// <returns>Đã cài hoặc chưa.</returns>
         public static bool IsAppInstalled(string name)
         {
             var path = @"Microsoft\Windows\CurrentVersion\Uninstall";
